@@ -1,1 +1,5 @@
 .venv
+corpus/NOTEEVENTS.csv
+corpus/deid_surrogate_train.xml
+corpus/common_data
+corpus/dummy_phi
