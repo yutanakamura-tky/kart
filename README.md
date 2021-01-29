@@ -3,20 +3,36 @@ This is an implementation of our [https://arxiv.org/abs/2101.00036](arXiv prepri
 
 ## Usage
 ### 1. Preparation
-#### 1-1. Clone Repository
-
-```sh
-git clone git@github.com:yutanakamura-tky/kart.git
-cd kart
-bash src/make_mimic_iii_dummy_phi.sh
-```
-
-#### 1-2. Get Poetry
+#### 1-1. Get Poetry
 
 ```sh
 curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py > ~/get-poetry.py
 cd ~
 python get-poetry.py --version  1.1.4
+```
+#### 1-2. Clone Repository & Install Packages
+
+```sh
+cd ~
+git clone git@github.com:yutanakamura-tky/kart.git
+cd ~/kart
+```
+
+```
+<<< a script to install packages >>>
+```
+
+
+#### 1-3. Make MIMIC-III-dummy-PHI
+```
+cd ~/kart/src
+bash make_mimic_iii_dummy_phi.sh
+```
+
+#### 1-4. Get non-domain-specific uncased BERT-base model
+```
+cd ~/kart/src
+bash get_google_bert_model.sh
 ```
 
 ## Citation
