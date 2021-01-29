@@ -1,6 +1,5 @@
 # KART: Privacy Leakage Framework of Language Models Pre-trained with Clinical Records
-This is an implementation of our
-[https://arxiv.org/abs/2101.00036](arXiv preprint paper) "KART: Privacy Leakage Framework of Language Models Pre-trained with Clinical Records."  
+This is an implementation of our arXiv preprint paper (https://arxiv.org/abs/2101.00036) "KART: Privacy Leakage Framework of Language Models Pre-trained with Clinical Records."  
 
 ## Usage
 ### 1. Preparation
@@ -11,18 +10,19 @@ curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poet
 cd ~
 python get-poetry.py --version  1.1.4
 ```
+
+```sh
+poetry config virtualenvs.in-project true
+```
+
 #### 1-2. Clone Repository & Install Packages
 
 ```sh
 cd ~
 git clone git@github.com:yutanakamura-tky/kart.git
 cd ~/kart
+poetry install
 ```
-
-```
-<<< a script to install packages >>>
-```
-
 
 #### 1-3. Make MIMIC-III-dummy-PHI
 ```
