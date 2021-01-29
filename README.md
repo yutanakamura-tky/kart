@@ -1,5 +1,6 @@
 # KART: Privacy Leakage Framework of Language Models Pre-trained with Clinical Records
-This is an implementation of our [https://arxiv.org/abs/2101.00036](arXiv preprint paper) "KART: Privacy Leakage Framework of Language Models Pre-trained with Clinical Records."  
+This is an implementation of our
+[https://arxiv.org/abs/2101.00036](arXiv preprint paper) "KART: Privacy Leakage Framework of Language Models Pre-trained with Clinical Records."  
 
 ## Usage
 ### 1. Preparation
