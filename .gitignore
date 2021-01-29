@@ -2,6 +2,8 @@ __pycache__
 .csv
 .venv
 corpus/NOTEEVENTS.csv
+corpus/NOTEEVENTS_WITH_DUMMY_PHI.csv
 corpus/deid_surrogate_train.xml
 corpus/common_data
 corpus/dummy_phi
+model
