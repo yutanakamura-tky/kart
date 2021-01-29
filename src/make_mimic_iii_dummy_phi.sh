@@ -29,3 +29,4 @@ bash mimic_iii_dummy_phi/part_4_embed_dummy_phi_with_surrogate_mapping.sh ${data
 bash mimic_iii_dummy_phi/part_4_embed_dummy_phi_with_surrogate_mapping.sh ${dataset_dir} shadow 
 
 python mimic_iii_dummy_phi/part_5_concatenate_noteevents.py ${dataset_dir} hospital shadow
+

@@ -215,6 +215,8 @@ echo -e "Replacing placeholders that can be handled without surrogate mapping ..
     
     mv ${tmp} ${output_pseudonymized_mimic_before_surrogate_mapping}
     echo -e "Done! ${tmp} -> ${output_pseudonymized_mimic_before_surrogate_mapping}"
+
+    rm ${dataset_dir}/sed*
     
 }
 
