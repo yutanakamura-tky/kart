@@ -3,7 +3,7 @@
 # This script will download the uncase BERT-base model by Google Research.
 # The model will be saved at "../model/bert".
 
-dir_model=../model/bert
+dir_model=../models/bert
 path_zip=$dir_model/uncased_L-12_H-768_A-12.zip
 
 echo "===== Getting non-domain-specific uncased BERT-base model ====="
