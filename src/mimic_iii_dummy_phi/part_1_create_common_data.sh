@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function create_common_output_files () {
 
 dataset_dir=$1

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function create_surrogate_mapping () {
 
 dataset_dir=$1
