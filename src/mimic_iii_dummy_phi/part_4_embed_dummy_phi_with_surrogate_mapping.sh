@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function replace_placeholders_with_dummy_phi_with_mapping() {
 
 dataset_dir=$1
