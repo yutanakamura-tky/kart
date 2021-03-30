@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Run this script via ../make_mimic_iii_dummy_phi.sh.
+# Reproducibility Confirmed.
 
 function replace_placeholders_with_bummy_phi_without_mapping () {
 
