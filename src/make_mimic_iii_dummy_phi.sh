@@ -21,15 +21,15 @@
 dataset_dir=../corpus
 echo "===== Creation of MIMIC-III-dummy-PHI ====="
 
-bash mimic_iii_dummy_phi/part_1_create_common_data.sh ${dataset_dir} 
+bash modules/mimic_iii_dummy_phi/part_1_create_common_data.sh ${dataset_dir} 
 
-bash mimic_iii_dummy_phi/part_2_create_surrogate_mapping.sh ${dataset_dir} hospital 42
-bash mimic_iii_dummy_phi/part_2_create_surrogate_mapping.sh ${dataset_dir} shadow 12345
+bash modules/mimic_iii_dummy_phi/part_2_create_surrogate_mapping.sh ${dataset_dir} hospital 42
+bash modules/mimic_iii_dummy_phi/part_2_create_surrogate_mapping.sh ${dataset_dir} shadow 12345
 
-bash mimic_iii_dummy_phi/part_3_embed_dummy_phi_without_surrogate_mapping.sh ${dataset_dir}
+bash modules/mimic_iii_dummy_phi/part_3_embed_dummy_phi_without_surrogate_mapping.sh ${dataset_dir}
 
-bash mimic_iii_dummy_phi/part_4_embed_dummy_phi_with_surrogate_mapping.sh ${dataset_dir} hospital
-bash mimic_iii_dummy_phi/part_4_embed_dummy_phi_with_surrogate_mapping.sh ${dataset_dir} shadow 
+bash modules/mimic_iii_dummy_phi/part_4_embed_dummy_phi_with_surrogate_mapping.sh ${dataset_dir} hospital
+bash modules/mimic_iii_dummy_phi/part_4_embed_dummy_phi_with_surrogate_mapping.sh ${dataset_dir} shadow 
 
-python mimic_iii_dummy_phi/part_5_concatenate_noteevents.py ${dataset_dir} hospital shadow
+python modules/mimic_iii_dummy_phi/part_5_concatenate_noteevents.py ${dataset_dir} hospital shadow
 
