@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Run this script via ../make_mimic_iii_dummy_phi.sh.
+# Reproducibility Confirmed.
 
 function create_common_output_files () {
 
@@ -46,14 +49,14 @@ echo -e "Done! ${output_raw_noteevents} -> ${output_unique_placeholder}"
 
 
 # Itemize all placeholder categories
-echo -e "Gathering de-identification placeholders with the same categories ..."
+echo -e "Gathering de-identification placeholders by categories ..."
 cat ${output_unique_placeholder} | sed -E "s/^\[\*\*(.+) [0-9]*\*\*\]$/\1/g" | uniq | sort > ${output_placeholder_category}
 echo -e "Done! ${output_unique_placeholder} -> ${output_placeholder_category}"
 
 
 # Itemize all surrogate entities
-echo -e "Collecting surrogate entities from i2b2 2006 corpus ..."
-msg="Surrogate entities"
+echo -e "Collecting dummy identifiers from i2b2 2006 corpus ..."
+msg="Dummy identifiers"
 
     grep -o -E '<PHI TYPE="AGE">[^<]*?</PHI>' ${input_i2b2_file} | sed -E 's/<PHI TYPE="AGE">(.*)<\/PHI>/\1/g' > ${output_surrogate_i2b2_age}
     echo -e "${msg} (1/8): ${input_i2b2_file} -> ${output_surrogate_i2b2_age} (n=`uniq ${output_surrogate_i2b2_age} | wc -l`)"

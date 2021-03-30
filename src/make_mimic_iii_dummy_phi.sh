@@ -2,6 +2,7 @@
 #
 # This script creates MIMIC-III-dummy-PIH,
 # an authentic corpus of clinical records with dummy personal information from MIMIC-III clinical records.
+# Reproducibility is confirmed.
 #
 # Usage
 #
@@ -9,9 +10,11 @@
 #    - MIMIC-III noteevents at "../corpus/NOTEEVENTS.csv"
 #    - i2b2 2006 de-identification training set at "../corpus/deid_surrogate_train.xml"
 #
-# 2. Run this script. This script will take about an hour to complete.
+# 2. Change working directory to "src".
 #
-# 3. The following file will be generated:
+# 3. Run this script. This script will take about an hour to complete.
+#
+# 4. The following file will be generated:
 #    - MIMIC-III-dummy-PHI noteevents at "../corpus/NOTEEVENTS_WITH_DUMMY_PHI.csv"
 
 
