@@ -34,12 +34,13 @@ corpus=$1      # Either of hospital, shadow
 code=$2        # Either of c1p2, c0p2, c1p1, c0p1, c1p0, c0p0
 anonymity=$3   # Either of hipaa, no_anonymization
 
-dir_bert_model=../model/bert
-dir_bert_tf1=./bert
+root_dir=../../..
+dir_bert_model=${root_dir}/model/bert
+dir_bert_tf1=../bert
+dir_corpus=../corpus/pretraining_corpus
 
 script_path=${dir_bert_tf1}/create_pretraining_data.py
 
-dir_corpus=../corpus/pretraining_corpus
 basename_corpus=pretraining_corpus_${1}_${2}_${3}.txt
 input_file=${dir_corpus}/${basename_corpus}
 vocab_file=${dir_bert_model}/vocab.txt

@@ -18,7 +18,7 @@ output_surrogate_map_with_id=${surrogate_map_dir}/surrogate_map_for_placeholders
     echo -e "Copied to temporary file: ${output_pseudonymized_mimic_before_surrogate_mapping} -> ${tmp}"
     
     # New summary using placeholder map (but not placeholders without id)
-    python mimic_iii_dummy_phi/placeholder_to_surrogate.py ${tmp} ${output_surrogate_map_with_id} ${tmp}_tmp
+    python placeholder_to_surrogate.py ${tmp} ${output_surrogate_map_with_id} ${tmp}_tmp
     mv ${tmp}_tmp ${output_pseudonymized_mimic}
     rm ${tmp}
     
