@@ -1,3 +1,5 @@
+import argparse
+
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -662,6 +664,12 @@ def add_subset_columns(df):
     assert df["in_shadow_train_1k_less_c_least_p_div"].sum() == 1000
 
     return df
+
+
+def get_args():
+    parser = argparse.ArgumentParser()
+    args = parser.parse_args()
+    return args
 
 
 if __name__ == "__main__":

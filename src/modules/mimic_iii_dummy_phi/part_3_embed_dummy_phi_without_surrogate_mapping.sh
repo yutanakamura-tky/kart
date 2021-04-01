@@ -6,7 +6,7 @@
 function replace_placeholders_with_bummy_phi_without_mapping () {
 
 dataset_dir=$1
-common_data_dir=${dataset_dir}/common_data
+common_data_dir=${dataset_dir}/tmp/common_data
 random_state=$2
 
 output_cleaned_noteevents=${common_data_dir}/noteevents_text_cleaned.csv  # This data will be used repeatedly

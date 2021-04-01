@@ -161,20 +161,20 @@ function main () {
 # $2: Random state. This will determine surrogate entities to be filled in deidentification placeholders.
 
 dataset_dir=$1
-common_data_dir=${dataset_dir}/common_data
+common_data_dir=${dataset_dir}/tmp/common_data
 random_state=$2
 
 if [ -e ${dataset_dir} ]; then
     :
 else
-    mkdir ${dataset_dir}
+    mkdir -p ${dataset_dir}
     echo -e "Made output directory: ${dataset_dir}"
 fi
 
 if [ -e ${common_data_dir} ]; then
     :
 else
-    mkdir ${common_data_dir}
+    mkdir -p ${common_data_dir}
     echo -e "Made output directory: ${common_data_dir}"
 fi
 

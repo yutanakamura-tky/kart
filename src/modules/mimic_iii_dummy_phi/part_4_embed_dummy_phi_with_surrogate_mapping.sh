@@ -6,8 +6,8 @@
 function replace_placeholders_with_dummy_phi_with_mapping() {
 
 dataset_dir=$1
-common_data_dir=${dataset_dir}/common_data
-surrogate_map_dir=${dataset_dir}/dummy_phi/$2
+common_data_dir=${dataset_dir}/tmp/common_data
+surrogate_map_dir=${dataset_dir}/tmp/dummy_phi/$2
 
 tmp=${dataset_dir}/___temp_noteevents_text_with_dummy_phi.csv
 output_pseudonymized_mimic_before_surrogate_mapping=${common_data_dir}/noteevents_text_with_dummy_phi_before_surrogate_mapping.csv

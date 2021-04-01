@@ -31,7 +31,7 @@ def get_args():
 
 def concatenate_noteevents_with_dummy_phi(df, dataset_dir, corpus_name):
     pseudonymized_noteevents_text_path = (
-        f"{dataset_dir}/dummy_phi/{corpus_name}/noteevents_text_with_dummy_phi.csv"
+        f"{dataset_dir}/tmp/dummy_phi/{corpus_name}/noteevents_text_with_dummy_phi.csv"
     )
     print(f"Loading {pseudonymized_noteevents_text_path} ...")
     df_pseudonymized_text = pd.read_csv(

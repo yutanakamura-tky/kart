@@ -6,8 +6,8 @@
 function create_surrogate_mapping () {
 
 dataset_dir=$1
-common_data_dir=${dataset_dir}/common_data
-surrogate_map_dir=${dataset_dir}/dummy_phi/$2
+common_data_dir=${dataset_dir}/tmp/common_data
+surrogate_map_dir=${dataset_dir}/tmp/dummy_phi/$2
 random_state=$3
 
 
