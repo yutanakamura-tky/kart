@@ -46,7 +46,7 @@ grep "Age over 90" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_age.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_age.csv', '$output_surrogate_map', 'random_int', 90, 115, random_state=$random_state)
 "
 
@@ -110,7 +110,7 @@ grep -e "Apartment Address(" -e "Street Address(" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_address.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_address.csv', '$output_surrogate_map', 'address', postprocess=lambda x: x.replace('\n', ' '), random_state=$random_state)
 "
 
@@ -123,7 +123,7 @@ grep "Company" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_company.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_company.csv', '$output_surrogate_map', 'company', random_state=$random_state)
 "
 
@@ -134,7 +134,7 @@ echo -e "Dummy identifiers: Company -> fake.company()"
 grep "Country" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_country.csv
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_country.csv', '$output_surrogate_map', 'country', random_state=$random_state)
 "
 
@@ -147,7 +147,7 @@ grep "E-mail" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_email.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_email.csv', '$output_surrogate_map', 'email', random_state=$random_state)
 "
 
@@ -156,7 +156,7 @@ grep -E "^Email\:" ${output_cleaned_noteevents} \
     > ${surrogate_map_dir}/surrogate_key_email_2.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_email_2.csv', '$output_surrogate_map', 'email', postprocess=lambda x: f'Email: {x}', random_state=$random_state)
 "
 
@@ -170,7 +170,7 @@ grep -e "Doctor First Name" -e "\[\*\*First Name" -e "\[\*\* First Name" -e "Kno
     > ${surrogate_map_dir}/surrogate_key_first_name.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_first_name.csv', '$output_surrogate_map', 'first_name', random_state=$random_state)
 "
 
@@ -197,7 +197,7 @@ grep -oE "Dr\.[ ]*\.+" ${output_cleaned_noteevents} | sort | uniq \
     >> ${surrogate_map_dir}/surrogate_key_last_name.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_last_name.csv', '$output_surrogate_map', 'last_name', random_state=$random_state)
 "
 
@@ -223,7 +223,7 @@ grep "Female First Name" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_first_name_female.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_first_name_female.csv', '$output_surrogate_map', 'first_name_female', random_state=$random_state)
 "
 
@@ -236,7 +236,7 @@ grep "Male First Name" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_first_name_male.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_first_name_male.csv', '$output_surrogate_map', 'first_name_male', random_state=$random_state)
 "
 
@@ -249,7 +249,7 @@ grep "Name Prefix (Prefixes)" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_prefix.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_prefix.csv', '$output_surrogate_map', 'prefix', random_state=$random_state)
 "
 
@@ -262,7 +262,7 @@ grep -e "Name12" -e "Initial (" -e "Initials (" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_initial.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_initial.csv', '$output_surrogate_map', 'first_name', postprocess=lambda x: x[0] + '.', random_state=$random_state)
 "
 
@@ -336,7 +336,7 @@ grep -oE "\- \[\*\*Location([^]])+[0-9]+\*\*\]" ${output_cleaned_noteevents} | s
     > ${surrogate_map_dir}/surrogate_key_city.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_city.csv', '$output_surrogate_map', 'city', random_state=$random_state)
 "
 
@@ -349,7 +349,7 @@ grep -e "Clip Number" -e "Job Number" -e "MD Number" -e "Medical Record Number" 
     > ${surrogate_map_dir}/surrogate_key_id.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_id.csv', '$output_surrogate_map', 'random_int', 1, 99999999, random_state=$random_state)
 "
 
@@ -361,7 +361,7 @@ grep "January" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_md_jan.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_md_jan.csv', '$output_surrogate_map', 'random_int', 1, 31, postprocess=lambda x: f'1/{x}', random_state=$random_state)
 "
 
@@ -372,7 +372,7 @@ grep "February" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_md_feb.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_md_feb.csv', '$output_surrogate_map', 'random_int', 1, 28, postprocess=lambda x: f'2/{x}', random_state=$random_state)
 "
 
@@ -384,7 +384,7 @@ grep "March" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_md_mar.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_md_mar.csv', '$output_surrogate_map', 'random_int', 1, 31, postprocess=lambda x: f'3/{x}', random_state=$random_state)
 "
 echo -e "Dummy identifiers: Date (3)"
@@ -395,7 +395,7 @@ grep "April" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_md_apr.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_md_apr.csv', '$output_surrogate_map', 'random_int', 1, 30, postprocess=lambda x: f'4/{x}', random_state=$random_state)
 "
 echo -e "Dummy identifiers: Date (4)"
@@ -406,7 +406,7 @@ grep "May" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_md_may.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_md_may.csv', '$output_surrogate_map', 'random_int', 1, 31, postprocess=lambda x: f'5/{x}', random_state=$random_state)
 "
 echo -e "Dummy identifiers: Date (5)"
@@ -417,7 +417,7 @@ grep "June" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_md_jun.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_md_jun.csv', '$output_surrogate_map', 'random_int', 1, 30, postprocess=lambda x: f'6/{x}', random_state=$random_state)
 "
 echo -e "Dummy identifiers: Date (6)"
@@ -428,7 +428,7 @@ grep "July" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_md_jul.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_md_jul.csv', '$output_surrogate_map', 'random_int', 1, 31, postprocess=lambda x: f'7/{x}', random_state=$random_state)
 "
 echo -e "Dummy identifiers: Date (7)"
@@ -439,7 +439,7 @@ grep "August" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_md_aug.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_md_aug.csv', '$output_surrogate_map', 'random_int', 1, 31, postprocess=lambda x: f'8/{x}', random_state=$random_state)
 "
 echo -e "Dummy identifiers: Date (8)"
@@ -450,7 +450,7 @@ grep "September" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_md_sep.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_md_sep.csv', '$output_surrogate_map', 'random_int', 1, 30, postprocess=lambda x: f'9/{x}', random_state=$random_state)
 "
 echo -e "Dummy identifiers: Date (9)"
@@ -461,7 +461,7 @@ grep "October" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_md_oct.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_md_oct.csv', '$output_surrogate_map', 'random_int', 1, 31, postprocess=lambda x: f'10/{x}', random_state=$random_state)
 "
 echo -e "Dummy identifiers: Date (10)"
@@ -472,7 +472,7 @@ grep "November" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_md_nov.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_md_nov.csv', '$output_surrogate_map', 'random_int', 1, 30, postprocess=lambda x: f'11/{x}', random_state=$random_state)
 "
 echo -e "Dummy identifiers: Date (11)"
@@ -483,7 +483,7 @@ grep "December" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_md_dec.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_md_dec.csv', '$output_surrogate_map', 'random_int', 1, 31, postprocess=lambda x: f'12/{x}', random_state=$random_state)
 "
 echo -e "Dummy identifiers: Date (12)"
@@ -495,7 +495,7 @@ grep "Month (only)" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_month.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_month.csv', '$output_surrogate_map', 'month_name', random_state=$random_state)
 "
 echo -e "Dummy identifiers: Date (13)"
@@ -506,7 +506,7 @@ grep -e "Month/Day (" -e "Month Day" -e "Day Month" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_md.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_md.csv', '$output_surrogate_map', 'date', '%m/%d', random_state=$random_state)
 "
 echo -e "Dummy identifiers: Date (14)"
@@ -517,7 +517,7 @@ grep -e "Month Year" -e "Year/Month " -e "Month/Year" $output_unique_placeholder
     > ${surrogate_map_dir}/surrogate_key_my.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_my.csv', '$output_surrogate_map', 'date', '%m/%y', random_state=$random_state)
 "
 echo -e "Dummy identifiers: Date (15)"
@@ -527,7 +527,7 @@ echo -e "Dummy identifiers: Date (15)"
 grep -e "Month/Day/Year" -e "Year/Month/Day" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_ymd.csv
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_ymd.csv', '$output_surrogate_map', 'date', '%m/%d/%y', random_state=$random_state)
 "
 echo -e "Dummy identifiers: Date (16)"
@@ -538,7 +538,7 @@ echo -e "Dummy identifiers: Date (16)"
 grep "Telephone/Fax" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_phone.csv
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_phone.csv', '$output_surrogate_map', 'phone_number', random_state=$random_state)
 "
 echo -e "Dummy identifiers: Phone number -> fake.phone_number()"
@@ -549,7 +549,7 @@ echo -e "Dummy identifiers: Phone number -> fake.phone_number()"
 grep "PO Box" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_po.csv
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_po.csv', '$output_surrogate_map', 'random_int', postprocess=lambda x: f'PO Box {x}', random_state=$random_state)
 "
 echo -e "Dummy identifiers: PO Box -> fake.random_int()"
@@ -560,7 +560,7 @@ echo -e "Dummy identifiers: PO Box -> fake.random_int()"
 grep "Social Security Number" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_social_security.csv
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_social_security.csv', '$output_surrogate_map', 'random_int', 0, 999999999, postprocess=lambda x: f'{x:09d}'[:3] + '-' + f'{x:09d}'[3:5] + '-' + f'{x:09d}'[5:], random_state=$random_state)
 "
 echo -e "Dummy identifiers: Social Security Number -> XXX-XX-XXXX"
@@ -570,7 +570,7 @@ echo -e "Dummy identifiers: Social Security Number -> XXX-XX-XXXX"
 grep "Medical record number" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_record.csv
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_record.csv', '$output_surrogate_map', 'random_int', 0, 999999999, random_state=$random_state)
 "
 echo -e "Dummy identifiers: Medical Record Number -> XXX-XX-XXXX"
@@ -580,7 +580,7 @@ echo -e "Dummy identifiers: Medical Record Number -> XXX-XX-XXXX"
 grep "State " $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_state.csv
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_state.csv', '$output_surrogate_map', 'state', random_state=$random_state)
 "
 echo -e "Dummy identifiers: State -> fake.state()"
@@ -591,7 +591,7 @@ grep -oE "Unit No:[ ]+\[\*\*Numeric Identifier [0-9]+\*\*\]" ${output_cleaned_no
     > ${surrogate_map_dir}/surrogate_key_unit.csv
 
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_unit.csv', '$output_surrogate_map', 'random_int', 0, 2000, random_state=$random_state)
 "
 echo -e "Dummy identifiers: Unit No: [**Numberic Identifier**] -> Unit No: (fake.random_int(0,2000))"
@@ -602,7 +602,7 @@ echo -e "Dummy identifiers: Unit No: [**Numberic Identifier**] -> Unit No: (fake
 grep "University" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_university.csv
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_university.csv', '$output_surrogate_map', 'city', postprocess=lambda x: f'{x} University', random_state=$random_state)
 "
 echo -e "Dummy identifiers: University/College -> fake.city() + University"
@@ -613,7 +613,7 @@ echo -e "Dummy identifiers: University/College -> fake.city() + University"
 grep "URL" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_url.csv
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_url.csv', '$output_surrogate_map', 'url', postprocess=lambda x: x.replace('http://', '').replace('https://', '').replace('/', ''), random_state=$random_state)
 "
 echo -e "Dummy identifiers: URL -> fake.url().replace('http://', '').replace('https://', '').replace('/', '')"
@@ -624,7 +624,7 @@ echo -e "Dummy identifiers: URL -> fake.url().replace('http://', '').replace('ht
 grep "State/Zipcode" $output_unique_placeholder \
     > ${surrogate_map_dir}/surrogate_key_zipcode.csv
 python -c "
-from mimic_iii_dummy_phi import add_surrogate_mapping
+from modules.mimic_iii_dummy_phi import add_surrogate_mapping
 add_surrogate_mapping('${surrogate_map_dir}/surrogate_key_zipcode.csv', '$output_surrogate_map', 'zipcode', random_state=$random_state) 
 "
 echo -e "Dummy identifiers: Zipcode -> fake.zipcode()"

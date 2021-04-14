@@ -14,12 +14,11 @@ import pandas as pd
 from spacy.lang.en import English
 from tqdm import tqdm
 
-from modules import add_subset_columns
-
 
 def main():
     args = get_args()
-    make_pretraining_corpus(args.dataset_dir)
+    make_pretraining_corpus(args.dataset_dir, "hospital")
+    make_pretraining_corpus(args.dataset_dir, "shadow")
 
 
 def get_args():
@@ -29,35 +28,27 @@ def get_args():
     return args
 
 
-def make_pretraining_corpus(dataset_dir):
+def make_pretraining_corpus(dataset_dir: str, mode: str):
     """
-    inputs
-    ------
-    corpus (str): Set 'hospital', 'shadow' or 'debug' to format corpus.
+    mode: 'hospital' or 'shadow'
     """
     tqdm.pandas()
 
     # STEP 1: load Note datasets
     INPUT_DIR = Path(dataset_dir)
-    OUTPUT_DIR = INPUT_DIR / "pretraining_corpus"
+    OUTPUT_DIR = INPUT_DIR / "pretraining_corpus" / mode
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    INPUT_PATH = INPUT_DIR / "NOTEEVENTS_WITH_DUMMY_PHI.csv"
+    INPUT_PATH = INPUT_DIR / f"MIMIC_III_DUMMY_PHI_{mode.upper()}.csv"
     print(f"Loading noteevents from {INPUT_PATH} ...")
-    df = add_subset_columns(pd.read_csv(INPUT_PATH, quoting=0, low_memory=False))
+    df = pd.read_csv(INPUT_PATH, quoting=0)
 
     # STEP 2: Preprocessing
     print("Preprocessing ...")
-    print("(1/3) D_private Corpus (no anonymization) ...")
-    df_hospital = preprocessing(
-        df["TEXT_WITH_DUMMY_PHI_HOSPITAL"].loc[df["in_hospital"]], hipaa=False
-    )
-    print("(2/3) D_shadow Corpus (no anonymization) ...")
-    df_shadow = preprocessing(
-        df["TEXT_WITH_DUMMY_PHI_SHADOW"].loc[df["in_shadow"]], hipaa=False
-    )
-    print("(3/3) D_public Corpus (anonymized under the HIPAA Privacy Rule) ...")
-    df_hipaa = preprocessing(df["TEXT"], hipaa=True)
+    print("(1/2) D_private Corpus (no anonymization) ...")
+    df_sensitive = preprocessing(df.loc[:, "TEXT_WITH_DUMMY_PHI_HOSPITAL"], hipaa=False)
+    print("(2/2) D_public Corpus (anonymized under the HIPAA Privacy Rule) ...")
+    df_hipaa = preprocessing(df.loc[:, "TEXT"], hipaa=True)
     print("Preprocessing complete.")
 
     # for memory efficiency
@@ -71,40 +62,24 @@ def make_pretraining_corpus(dataset_dir):
     nlp = English()  # just the language with no model
     nlp.add_pipe(nlp.create_pipe("sentencizer"))
 
-    print("(1/3) D_private Corpus (no anonymization) ...")
-    df_hospital_sentences = df_hospital.progress_apply(lambda x: to_sentence(nlp, x))
+    print("(1/2) D_private Corpus (no anonymization) ...")
+    df_sensitive_sentences = df_sensitive.progress_apply(lambda x: to_sentence(nlp, x))
     for i, code in enumerate(corpus_codes):
-        print(f"({i+1+6*0}/24) Saving D_private without anonymization ({code})")
+        print(f"({i+1+6*0}/12) Saving D_private without anonymization ({code})")
         save_noteevents_as_pretraining_corpus(
-            df_hospital_sentences, df, OUTPUT_DIR, "hospital", code, "no_anonymization"
+            df_sensitive_sentences, df, OUTPUT_DIR, code, "no_anonymization"
         )
-    del df_hospital, df_hospital_sentences
+    del df_sensitive, df_sensitive_sentences
     gc.collect()
 
-    print("(2/3) D_shadow Corpus (no anonymization) ...")
-    df_shadow_sentences = df_shadow.progress_apply(lambda x: to_sentence(nlp, x))
-    for i, code in enumerate(corpus_codes):
-        print(f"({i+1+6*1}/24) Saving D_shadow without anonymization ({code})")
-        save_noteevents_as_pretraining_corpus(
-            df_shadow_sentences, df, OUTPUT_DIR, "shadow", code, "no_anonymization"
-        )
-    del df_shadow, df_shadow_sentences
-    gc.collect()
-
-    print("(3/3) D_public Corpus (anonymized under the HIPAA Privacy Rule) ...")
+    print("(2/2) D_public Corpus (anonymized under the HIPAA Privacy Rule) ...")
     df_hipaa_sentences = df_hipaa.progress_apply(lambda x: to_sentence(nlp, x))
     for i, code in enumerate(corpus_codes):
         print(
-            f"({i*2+1+6*2}/24) Saving D_private anonymized under the HIPAA Privacy Rule ({code})"
+            f"({i+1+6*1}/12) Saving D_private anonymized under the HIPAA Privacy Rule ({code})"
         )
         save_noteevents_as_pretraining_corpus(
-            df_hipaa_sentences, df, OUTPUT_DIR, "hospital", code, "hipaa"
-        )
-        print(
-            f"({i*2+2+6*2}/24) Saving D_shadow anonymized under the HIPAA Privacy Rule ({code})"
-        )
-        save_noteevents_as_pretraining_corpus(
-            df_hipaa_sentences, df, OUTPUT_DIR, "shadow", code, "hipaa"
+            df_hipaa_sentences, df, OUTPUT_DIR, code, "hipaa"
         )
     print("Complete!")
 
@@ -158,29 +133,26 @@ def to_sentence(spacy_func, text):
 
 
 def save_noteevents_as_pretraining_corpus(
-    df_target, df_master, output_dir, corpus_type, corpus_code, anonymization
+    df_target, df_master, output_dir, corpus_code: str, anonymization
 ):
-    out_path = get_out_path(output_dir, corpus_type, corpus_code, anonymization)
+    out_path = get_out_path(output_dir, corpus_code, anonymization)
     df_target_without_unusing_rows = drop_unnecessary_rows(
-        df_target, df_master, corpus_type, corpus_code, anonymization
+        df_target, df_master, corpus_code
     )
     noteevents_to_txt(df_target_without_unusing_rows, out_path)
 
 
-def get_target_column(corpus_type, corpus_code):
+def get_target_column(corpus_code: str) -> str:
     """
     Patameters
     ----------
-    df_target: pandas.DataFrame
-    df_master: pandas.DataFrame
-    corpus_type: str ('hospital', 'shadow')
     corpus_code: str ('c1p2', 'c0p2', 'c1p1', 'c0p1', 'c1p0', 'c0p0')
 
     Returns
     -------
-    pandas.DataFrame
+    str
     """
-    target_column_prefix = f"in_{corpus_type}_train_"
+    target_column_prefix = "in_train_"
     target_column_suffix_map = {
         "c1p2": "1M",
         "c0p2": "100k_less_c_div",
@@ -192,35 +164,27 @@ def get_target_column(corpus_type, corpus_code):
     return target_column_prefix + target_column_suffix_map[corpus_code]
 
 
-def drop_unnecessary_rows(
-    df_target, df_master, corpus_type, corpus_code, anonymization
-):
+def drop_unnecessary_rows(df_target, df_master, corpus_code):
     """
     Patameters
     ----------
     df_target: pandas.DataFrame
     df_master: pandas.DataFrame
-    corpus_type: str ('hospital', 'shadow')
     corpus_code: str ('c1p2', 'c0p2', 'c1p1', 'c0p1', 'c1p0', 'c0p0')
-    anonymization: str ('hipaa', 'no_anonymization')
 
     Returns
     -------
     pandas.DataFrame
     """
-    target_column = get_target_column(corpus_type, corpus_code)
-    if anonymization == "no_anonymization":
-        return df_target.loc[df_master.query(f"in_{corpus_type}").loc[:, target_column]]
-    elif anonymization == "hipaa":
-        return df_target.loc[df_master.loc[:, target_column]]
+    target_column = get_target_column(corpus_code)
+    return df_target.loc[df_master.loc[:, target_column]]
 
 
-def get_out_path(output_dir, corpus_type, corpus_code, anonymization):
+def get_out_path(output_dir, corpus_code, anonymization):
     """
     Parameters
     ----------
     output_dir: str
-    corpus_type: str ('hospital', 'shadow')
     corpus_code: str ('c1p2', 'c0p2', 'c1p1', 'c0p1', 'c1p0', 'c0p0')
     anonymization: str ('hipaa', 'no_anonymization')
 
@@ -229,7 +193,7 @@ def get_out_path(output_dir, corpus_type, corpus_code, anonymization):
     PosixPath
     """
 
-    out_basename = f"pretraining_corpus_{corpus_type}_{corpus_code}_{anonymization}.txt"
+    out_basename = f"pretraining_corpus_{corpus_code}_{anonymization}.txt"
     return Path(output_dir) / out_basename
 
 

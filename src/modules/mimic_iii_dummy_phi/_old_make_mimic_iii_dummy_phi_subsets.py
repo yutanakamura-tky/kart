@@ -11,14 +11,14 @@ def main():
     df = load_mimic_iii_dummy_phi()
     df = add_subset_columns(df)
     # Save
-    OUTPUT_PATH = "../../corpus/NOTEEVENTS_WITH_DUMMY_PHI_SAMPLE_SELECTION.csv"
+    OUTPUT_PATH = "../corpus/NOTEEVENTS_WITH_DUMMY_PHI_SAMPLE_SELECTION.csv"
     print(f"Saving to {OUTPUT_PATH} ...")
     df.to_csv(OUTPUT_PATH, index=False)
     print("Complete!")
 
 
 def load_mimic_iii_dummy_phi():
-    PATH = "../../corpus/NOTEEVENTS_WITH_DUMMY_PHI.csv"
+    PATH = "../corpus/NOTEEVENTS_WITH_DUMMY_PHI.csv"
     print(f"Opening {PATH} ...")
     df = pd.read_csv(PATH, quoting=0)
     return df
