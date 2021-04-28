@@ -34,19 +34,19 @@ corpus=$1      # Either of hospital, shadow
 code=$2        # Either of c1p2, c0p2, c1p1, c0p1, c1p0, c0p0
 anonymity=$3   # Either of hipaa, no_anonymization
 
-root_dir=../../..
-dir_bert_model=${root_dir}/model/bert
-dir_bert_tf1=../bert
-dir_corpus=../corpus/pretraining_corpus
+root_dir=..
+dir_bert_model=${root_dir}/models/bert
+dir_bert_tf1=${root_dir}/src/modules/bert
+dir_corpus=${root_dir}/corpus/pretraining_corpus/${1}
 
 script_path=${dir_bert_tf1}/create_pretraining_data.py
 
-basename_corpus=pretraining_corpus_${1}_${2}_${3}.txt
+basename_corpus=pretraining_corpus_${2}_${3}.txt
 input_file=${dir_corpus}/${basename_corpus}
 vocab_file=${dir_bert_model}/vocab.txt
 
-basename_tfrecord_128=tf_examples_${1}_${2}_${3}_128.tfrecord
-basename_tfrecord_512=tf_examples_${1}_${2}_${3}_512.tfrecord
+basename_tfrecord_128=tf_examples_${2}_${3}_128.tfrecord
+basename_tfrecord_512=tf_examples_${2}_${3}_512.tfrecord
 output_file_128=${dir_corpus}/${basename_tfrecord_128}
 output_file_512=${dir_corpus}/${basename_tfrecord_512}
 
