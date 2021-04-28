@@ -1,3 +1,6 @@
 [submodule "src/bert"]
-	path = src/bert
+	path = src/modules/bert
 	url = git@github:google-research/bert.git
+[submodule "biomedical_ner"]
+	path = biomedical_ner
+	url = git@github:yutanakamura-tky/biomedical_ner.git

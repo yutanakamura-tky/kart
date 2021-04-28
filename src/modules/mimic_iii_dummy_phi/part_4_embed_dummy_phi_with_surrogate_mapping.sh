@@ -6,8 +6,8 @@
 function replace_placeholders_with_dummy_phi_with_mapping() {
 
 dataset_dir=$1
-common_data_dir=${dataset_dir}/common_data
-surrogate_map_dir=${dataset_dir}/dummy_phi/$2
+common_data_dir=${dataset_dir}/tmp/common_data
+surrogate_map_dir=${dataset_dir}/tmp/dummy_phi/$2
 
 tmp=${dataset_dir}/___temp_noteevents_text_with_dummy_phi.csv
 output_pseudonymized_mimic_before_surrogate_mapping=${common_data_dir}/noteevents_text_with_dummy_phi_before_surrogate_mapping.csv
@@ -18,7 +18,7 @@ output_surrogate_map_with_id=${surrogate_map_dir}/surrogate_map_for_placeholders
     echo -e "Copied to temporary file: ${output_pseudonymized_mimic_before_surrogate_mapping} -> ${tmp}"
     
     # New summary using placeholder map (but not placeholders without id)
-    python mimic_iii_dummy_phi/placeholder_to_surrogate.py ${tmp} ${output_surrogate_map_with_id} ${tmp}_tmp
+    python modules/mimic_iii_dummy_phi/placeholder_to_surrogate.py ${tmp} ${output_surrogate_map_with_id} ${tmp}_tmp
     mv ${tmp}_tmp ${output_pseudonymized_mimic}
     rm ${tmp}
     

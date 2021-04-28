@@ -2,6 +2,11 @@
 This is an implementation of our arXiv preprint paper (https://arxiv.org/abs/2101.00036) "KART: Privacy Leakage Framework of Language Models Pre-trained with Clinical Records."  
 
 ## Usage
+### 0. Requirements
+
+- Python 3.6.4
+- Make sure that `$HOME` is set to environment variable `$PYTHONPATH`.
+
 ### 1. Preparation
 #### 1-1. Get Poetry
 
