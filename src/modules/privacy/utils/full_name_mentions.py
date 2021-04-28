@@ -1,16 +1,15 @@
-import pathlib
 import re
 
 import pandas as pd
 from tqdm import tqdm
 
-
-def get_repo_dir() -> pathlib.PosixPath:
-    this_dir = pathlib.Path(__file__).parent
-    return (this_dir / "../../..").resolve()
+from kart.src.modules.privacy.utils.path import get_repo_dir
 
 
-def add_full_name_columns(df):
+def add_full_name_columns(df: pd.DataFrame, mode: str) -> pd.DataFrame:
+    """
+    mode: 'hospital' or 'shadow'
+    """
     tqdm.pandas()
     regexp_patient = regexp_for_full_name()
 
@@ -21,38 +20,19 @@ def add_full_name_columns(df):
     )
     print("Added column 'patient_full_name_placeholder'")
 
-    mapping_path_hospital = (
-        get_repo_dir() / "corpus/tmp/dummy_phi/hospital/surrogate_map.csv"
-    )
-    mapping_path_shadow = (
-        get_repo_dir() / "corpus/tmp/dummy_phi/shadow/surrogate_map.csv"
-    )
+    mapping_path = get_repo_dir() / f"corpus/tmp/dummy_phi/{mode}/surrogate_map.csv"
 
-    print(f"Loading {mapping_path_hospital} ...")
-    print(f"Loading {mapping_path_shadow} ...")
+    print(f"Loading {mapping_path} ...")
 
-    df_map_hospital = pd.read_csv(mapping_path_hospital, header=None, quoting=0)
-    df_map_shadow = pd.read_csv(mapping_path_shadow, header=None, quoting=0)
-    mapping_hospital = {
-        df_map_hospital.iloc[i].loc[0]: df_map_hospital.iloc[i].loc[1]
-        for i in tqdm(range(len(df_map_hospital)))
-    }
-    mapping_shadow = {
-        df_map_shadow.iloc[i].loc[0]: df_map_shadow.iloc[i].loc[1]
-        for i in tqdm(range(len(df_map_shadow)))
+    df_map = pd.read_csv(mapping_path, header=None, quoting=0)
+    mapping = {
+        df_map.iloc[i].loc[0]: df_map.iloc[i].loc[1] for i in tqdm(range(len(df_map)))
     }
 
-    df["patient_full_name_hospital"] = df[
-        "patient_full_name_placeholder"
-    ].progress_apply(
-        lambda x: (mapping_hospital[x[0]], mapping_hospital[x[1]]) if x else ()
+    df["patient_full_name"] = df["patient_full_name_placeholder"].progress_apply(
+        lambda x: (mapping[x[0]], mapping[x[1]]) if x else ()
     )
-    print("Added column 'patient_full_name_hospital'")
-
-    df["patient_full_name_shadow"] = df["patient_full_name_placeholder"].progress_apply(
-        lambda x: (mapping_shadow[x[0]], mapping_shadow[x[1]]) if x else ()
-    )
-    print("Added column 'patient_full_name_shadow'")
+    print("Added column 'patient_full_name'")
 
     df["patient_full_name_tfreq"] = df.progress_apply(
         lambda row: len(
