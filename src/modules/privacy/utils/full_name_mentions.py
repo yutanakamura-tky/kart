@@ -1,4 +1,5 @@
 import re
+from typing import Dict, Optional
 
 import pandas as pd
 from tqdm import tqdm
@@ -11,26 +12,37 @@ def add_full_name_columns(df: pd.DataFrame, mode: str) -> pd.DataFrame:
     mode: 'hospital' or 'shadow'
     """
     tqdm.pandas()
-    regexp_patient = regexp_for_full_name()
 
-    df["patient_full_name_placeholder"] = df["TEXT"].progress_apply(
-        lambda x: re.compile(regexp_patient).findall(x)[0]
-        if re.compile(regexp_patient).findall(x)
+    patient_info = df["TEXT"].progress_apply(
+        lambda x: extract_patient_info_from_full_name_mention(x, n_sentences=5)
+    )
+
+    df["patient_full_name_placeholder"] = patient_info.progress_apply(
+        lambda x: (x["first_name_placeholder"], x["last_name_placeholder"])
+        if x["first_name_placeholder"] is not None
         else ()
     )
     print("Added column 'patient_full_name_placeholder'")
 
+    for key_name in ("full_name_mention", "patient_age"):
+        df[key_name] = patient_info.progress_apply(lambda x: x[key_name])
+        print(f"Added column '{key_name}'")
+
     mapping_path = get_repo_dir() / f"corpus/tmp/dummy_phi/{mode}/surrogate_map.csv"
-
     print(f"Loading {mapping_path} ...")
-
-    df_map = pd.read_csv(mapping_path, header=None, quoting=0)
+    df_map = pd.read_csv(
+        mapping_path, header=None, quoting=0, names=["placeholder", "dummy_phi"]
+    )
     mapping = {
-        df_map.iloc[i].loc[0]: df_map.iloc[i].loc[1] for i in tqdm(range(len(df_map)))
+        df_map.iloc[i].loc["placeholder"]: df_map.iloc[i].loc["dummy_phi"]
+        for i in tqdm(range(len(df_map)))
     }
 
-    df["patient_full_name"] = df["patient_full_name_placeholder"].progress_apply(
-        lambda x: (mapping[x[0]], mapping[x[1]]) if x else ()
+    df["patient_full_name"] = patient_info.progress_apply(
+        lambda x: (
+            mapping.get(x["first_name_placeholder"]),
+            mapping.get(x["last_name_placeholder"]),
+        )
     )
     print("Added column 'patient_full_name'")
 
@@ -61,7 +73,23 @@ def escape(string):
     return string
 
 
-def regexp_for_full_name_mention(n_sentences: int) -> str:
+def extract_patient_info_from_full_name_mention(
+    text: str, n_sentences: int
+) -> Dict[str, Optional[str]]:
+    r = re.compile(regexp_for_full_name_mention(n_sentences=n_sentences))
+    matches = r.findall(text)
+    result = {
+        "full_name_mention": matches[0][0] if matches else None,
+        "first_name_placeholder": matches[0][1] if matches else None,
+        "last_name_placeholder": matches[0][2] if matches else None,
+        "patient_age": matches[0][3] if matches else None,
+    }
+    return result
+
+
+def regexp_for_full_name_mention(
+    n_sentences: int = 5, placeholder_id_required: bool = True
+) -> str:
     """
     regexp for full name mention beginning with '(full name) is a/an (age) (sex).'
 
@@ -75,15 +103,15 @@ def regexp_for_full_name_mention(n_sentences: int) -> str:
     exp: str
     """
     exp = (
-        rf'({regexp_for_name("first", True)}\s*{regexp_for_name("last", True)}\s*'
-        + r"is\s+an?\s*(\d+|\[\*\*Age over 90 \*\*\]).*?[Yy].*?[Oo]"
+        r"("
+        + regexp_for_patient_full_name(placeholder_id_required=placeholder_id_required)
         + r"[^.]*." * (n_sentences)
         + r")"
     )
     return exp
 
 
-def regexp_for_full_name(placeholder_id_required: bool = True) -> str:
+def regexp_for_patient_full_name(placeholder_id_required: bool = True) -> str:
     exp = (
         rf'{regexp_for_name("first", placeholder_id_required)}'
         + rf'\s*{regexp_for_name("last", placeholder_id_required)}\s*'
@@ -92,7 +120,7 @@ def regexp_for_full_name(placeholder_id_required: bool = True) -> str:
     return exp
 
 
-def regexp_for_name(name_type, placeholder_id_required: bool = True) -> str:
+def regexp_for_name(name_type: str, placeholder_id_required: bool = True) -> str:
     if name_type == "first":
         template = [
             r"\[\*\*Doctor First Name {}?\*\*\]",
