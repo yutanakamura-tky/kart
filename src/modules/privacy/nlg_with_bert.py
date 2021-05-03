@@ -47,7 +47,11 @@ def main():
         "generation_mode": "parallel-sequential",
     }
 
-    print_config = {"print_every_iter": 50, "print_every_batch": 1, "verbose": True}
+    print_config = {
+        "print_every_iter": args.print_every_iter,
+        "print_every_batch": 1,
+        "verbose": not args.quiet,
+    }
 
     with torch.cuda.device(args.cuda_device_number):
         model.to("cuda")
@@ -69,7 +73,7 @@ def main():
     logger.info(f"Sentences saved to {output_path}")
 
 
-def load_bert_model(model_code: Optional[str]):
+def load_bert_model(model_code: Optional[str]) -> BertForPreTraining:
     if model_code is None:
         model = BertForPreTraining.from_pretrained("bert-base-uncased")
     else:
@@ -127,6 +131,10 @@ def get_args():
     )
     parser.add_argument("-r", "--burn-in", dest="burn_in", type=int, default=250)
     parser.add_argument("-i", "--max-iter", dest="max_iter", type=int, default=500)
+    parser.add_argument(
+        "-p", "--print-every-iter", dest="print_every_iter", type=int, default=50
+    )
+    parser.add_argument("-q", "--quiet", dest="quiet", action="store_true")
     args = parser.parse_args()
     return args
 

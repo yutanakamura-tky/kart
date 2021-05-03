@@ -1,3 +1,4 @@
+import copy
 import math
 import time
 from typing import Dict, List, Optional, Tuple
@@ -126,7 +127,7 @@ class Generator:
         original_input_ids, seed_length = SeedTextProcessor.seed_text_to_token_ids(
             seed_text, tokenizer, max_len, batch_size
         )
-        input_ids = original_input_ids
+        input_ids = copy.deepcopy(original_input_ids)
 
         for ii in range(max_iter):
             while True:
