@@ -34,7 +34,7 @@ def main():
     sample_size_config = {
         "n_samples": args.n_samples,
         "batch_size": args.batch_size,
-        "max_len": args.max_length,
+        "max_length": args.max_length,
     }
 
     generation_config = {
@@ -53,7 +53,12 @@ def main():
         "verbose": not args.quiet,
     }
 
-    out_path = "generation_result.txt"
+    out_path = (
+        "generation_result_"
+        + f"model{'_'+args.model_code if args.model_code else ''}_"
+        + f"iter_{args.max_iter}_"
+        + f"temp_{args.temperature}_topk_{args.top_k}_burnin_{args.burn_in}_len_{args.max_length}.txt"
+    )
 
     with torch.cuda.device(args.cuda_device_number):
         model.to("cuda")

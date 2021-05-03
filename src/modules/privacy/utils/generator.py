@@ -16,25 +16,25 @@ class SeedTextProcessor:
         cls,
         seed_text: str,
         tokenizer: transformers.models.bert.tokenization_bert.BertTokenizer,
-        max_len: int,
+        max_length: int,
         batch_size: int,
     ) -> Tuple[List[List[int]], int]:
         batch: List[str] = cls.duplicate_seed_text(seed_text, batch_size)
         initial_tokenization_result: Dict = tokenizer.batch_encode_plus(
-            batch, padding="max_length", max_length=max_len
+            batch, padding="max_length", max_length=max_length
         )
         initial_input_ids = initial_tokenization_result["input_ids"]
 
         # Note: seed_length does not include '[CLS]' and '[SEP]' tokens
         seed_length = sum(initial_tokenization_result["attention_mask"][0]) - 2
-        if seed_length == max_len - 2:
+        if seed_length == max_length - 2:
             return (initial_input_ids, seed_length)
         else:
             padded_batch: List[str] = cls.pad_with_mask_tokens(
-                batch, max_len - seed_length - 2
+                batch, max_length - seed_length - 2
             )
             padded_tokenization_result: Dict = tokenizer.batch_encode_plus(
-                padded_batch, padding="max_length", max_length=max_len
+                padded_batch, padding="max_length", max_length=max_length
             )
             padded_input_ids = padded_tokenization_result["input_ids"]
             return (padded_input_ids, seed_length)
@@ -60,7 +60,7 @@ class Generator:
         seed_text: List[List[str]],
         out_path: Union[str, pathlib.PosixPath],
         batch_size: int = 10,
-        max_len: int = 25,
+        max_length: int = 25,
         leed_out_len: int = 15,
         generation_mode: str = "parallel-sequential",
         sample: bool = True,
@@ -84,7 +84,7 @@ class Generator:
                     model=model,
                     tokenizer=tokenizer,
                     batch_size=batch_size,
-                    max_len=max_len,
+                    max_length=max_length,
                     top_k=top_k,
                     temperature=temperature,
                     burnin=burnin,
@@ -118,7 +118,7 @@ class Generator:
         model: transformers.models.bert.modeling_bert.BertForPreTraining,
         tokenizer: transformers.models.bert.tokenization_bert.BertTokenizer,
         batch_size: int,
-        max_len: int,
+        max_length: int,
         top_k: int,
         temperature: float,
         max_iter: int,
@@ -136,13 +136,13 @@ class Generator:
         """
         MASK_ID = tokenizer.convert_tokens_to_ids(["[MASK]"])[0]
         original_input_ids, seed_length = SeedTextProcessor.seed_text_to_token_ids(
-            seed_text, tokenizer, max_len, batch_size
+            seed_text, tokenizer, max_length, batch_size
         )
         input_ids = copy.deepcopy(original_input_ids)
 
         for ii in range(max_iter):
             while True:
-                target_position = np.random.randint(1, max_len - 1)
+                target_position = np.random.randint(1, max_length - 1)
                 if original_input_ids[0][target_position] == MASK_ID:
                     break
                 else:
