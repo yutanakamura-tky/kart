@@ -18,8 +18,7 @@ def main():
         / f"corpus/MIMIC_III_DUMMY_PHI_{args.corpus.upper()}_{args.code.upper()}.csv"
     )
     output_path = (
-        get_repo_dir()
-        / f"corpus/gold_disease_names_{args.corpus.upper()}_{args.code.upper()}.tsv"
+        get_repo_dir() / f"corpus/gold_disease_names_{args.corpus}_{args.code}.tsv"
     )
 
     print(f"Loading {input_path} ...")
