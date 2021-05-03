@@ -1,7 +1,9 @@
 import copy
+import logging
 import math
+import pathlib
 import time
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
@@ -56,6 +58,7 @@ class Generator:
         model: transformers.models.bert.modeling_bert.BertForPreTraining,
         tokenizer: transformers.models.bert.tokenization_bert.BertTokenizer,
         seed_text: List[List[str]],
+        out_path: Union[str, pathlib.PosixPath],
         batch_size: int = 10,
         max_len: int = 25,
         leed_out_len: int = 15,
@@ -69,6 +72,7 @@ class Generator:
         print_every_batch: int = 1,
         print_every_iter: int = 50,
         verbose: bool = True,
+        logger: Optional[logging.Logger] = None,
     ) -> List[str]:
         sentences = []
         n_batches = math.ceil(n_samples / batch_size)
@@ -98,6 +102,12 @@ class Generator:
                 )
                 start_time = time.time()
 
+            with open(out_path, "a") as f:
+                if batch_n == 0:
+                    f.write("\n".join(batch))
+                else:
+                    f.write("\n" + "\n".join(batch))
+
             sentences += batch
         return sentences
 
@@ -117,6 +127,7 @@ class Generator:
         print_every_iter: int,
         verbose: bool,
         sample: bool,
+        logger: Optional[logging.Logger] = None,
     ) -> List[str]:
         """Generate for one random position at a timestep
 
@@ -154,6 +165,11 @@ class Generator:
                 input_ids[jj][target_position] = new_token_ids[jj]
 
             if verbose and np.mod(ii + 1, print_every_iter) == 0:
+                print(f'{"="*30} Iter {ii+1} {"="*30}')
+                if logger:
+                    logger.info(
+                        f"Number of [MASK] tokens: {sum(map(lambda x: x==MASK_ID, input_ids[0]))}"
+                    )
                 print([tokenizer.decode(token_ids) for token_ids in input_ids])
 
         return [tokenizer.decode(token_ids) for token_ids in input_ids]

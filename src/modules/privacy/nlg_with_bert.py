@@ -53,9 +53,11 @@ def main():
         "verbose": not args.quiet,
     }
 
+    out_path = "generation_result.txt"
+
     with torch.cuda.device(args.cuda_device_number):
         model.to("cuda")
-        bert_sents = Generator.generate(
+        Generator.generate(
             model=model,
             tokenizer=tokenizer,
             seed_text=seed_text,
@@ -63,14 +65,11 @@ def main():
             **generation_config,
             **print_config,
             use_cuda=True,
+            logger=logger,
+            out_path=out_path,
         )
 
-    output_path = "generation_result.txt"
-
-    with open(output_path, "w") as f:
-        f.writelines(bert_sents)
-
-    logger.info(f"Sentences saved to {output_path}")
+    logger.info(f"Sentences saved to {out_path}")
 
 
 def load_bert_model(model_code: Optional[str]) -> BertForPreTraining:
