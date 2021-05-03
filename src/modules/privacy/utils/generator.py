@@ -65,9 +65,10 @@ class Generator:
         burnin: int = 200,
         max_iter: int = 500,
         cuda: bool = False,
-        print_every: int = 1,
+        print_every_batch: int = 1,
+        print_every_iter: int = 50,
         verbose: bool = True,
-    ):
+    ) -> List[str]:
         sentences = []
         n_batches = math.ceil(n_samples / batch_size)
         start_time = time.time()
@@ -85,10 +86,10 @@ class Generator:
                     max_iter=max_iter,
                     cuda=cuda,
                     verbose=True,
-                    print_every=print_every,
+                    print_every_iter=print_every_iter,
                 )
 
-            if (batch_n + 1) % print_every == 0:
+            if (batch_n + 1) % print_every_batch == 0:
                 print(
                     "Finished batch %d in %.3fs"
                     % (batch_n + 1, time.time() - start_time)
@@ -111,9 +112,9 @@ class Generator:
         max_iter: int = 300,
         burnin: int = 200,
         cuda: bool = False,
-        print_every: int = 10,
+        print_every_iter: int = 50,
         verbose: bool = True,
-    ):
+    ) -> List[str]:
         """Generate for one random position at a timestep
 
         args:
@@ -147,23 +148,10 @@ class Generator:
             for jj in range(batch_size):
                 input_ids[jj][target_position] = new_token_ids[jj]
 
-            if verbose and np.mod(ii + 1, print_every) == 0:
-                for_print = tokenizer.convert_ids_to_tokens(input_ids[0])
-                for_print = (
-                    for_print[: target_position + 1]
-                    + ["(*)"]
-                    + for_print[target_position + 1 :]
-                )
-                print("iter", ii + 1, " ".join(for_print))
+            if verbose and np.mod(ii + 1, print_every_iter) == 0:
+                print([tokenizer.decode(token_ids) for token_ids in input_ids])
 
-        return cls.untokenize_batch(input_ids, tokenizer)
-
-    @staticmethod
-    def untokenize_batch(
-        batch,
-        tokenizer: transformers.models.bert.tokenization_bert.BertTokenizer,
-    ):
-        return [tokenizer.convert_ids_to_tokens(sent) for sent in batch]
+        return [tokenizer.decode(token_ids) for token_ids in input_ids]
 
     @staticmethod
     def generate_step(
