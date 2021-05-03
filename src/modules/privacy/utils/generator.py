@@ -1,6 +1,6 @@
 import math
 import time
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -61,10 +61,10 @@ class Generator:
         generation_mode: str = "parallel-sequential",
         sample: bool = True,
         top_k: int = 100,
-        temperature: float = 1.0,
+        temperature: Optional[float] = 1.0,
         burnin: int = 200,
         max_iter: int = 500,
-        cuda: bool = False,
+        use_cuda: bool = False,
         print_every_batch: int = 1,
         print_every_iter: int = 50,
         verbose: bool = True,
@@ -84,9 +84,10 @@ class Generator:
                     temperature=temperature,
                     burnin=burnin,
                     max_iter=max_iter,
-                    cuda=cuda,
-                    verbose=True,
+                    use_cuda=use_cuda,
+                    verbose=verbose,
                     print_every_iter=print_every_iter,
+                    sample=sample,
                 )
 
             if (batch_n + 1) % print_every_batch == 0:
@@ -105,15 +106,16 @@ class Generator:
         seed_text: str,
         model: transformers.models.bert.modeling_bert.BertForPreTraining,
         tokenizer: transformers.models.bert.tokenization_bert.BertTokenizer,
-        batch_size: int = 10,
-        max_len: int = 15,
-        top_k: int = 0,
-        temperature: float = None,
-        max_iter: int = 300,
-        burnin: int = 200,
-        cuda: bool = False,
-        print_every_iter: int = 50,
-        verbose: bool = True,
+        batch_size: int,
+        max_len: int,
+        top_k: int,
+        temperature: float,
+        max_iter: int,
+        burnin: int,
+        use_cuda: bool,
+        print_every_iter: int,
+        verbose: bool,
+        sample: bool,
     ) -> List[str]:
         """Generate for one random position at a timestep
 
@@ -135,7 +137,9 @@ class Generator:
                     continue
             for jj in range(batch_size):
                 input_ids[jj][target_position] = MASK_ID
-            inp = torch.tensor(input_ids).cuda() if cuda else torch.tensor(input_ids)
+            inp = (
+                torch.tensor(input_ids).cuda() if use_cuda else torch.tensor(input_ids)
+            )
             logits = model(inp)[0]
             topk = top_k if (ii >= burnin) else 0
             new_token_ids = cls.generate_step(
@@ -157,18 +161,18 @@ class Generator:
     def generate_step(
         out: torch.Tensor,
         target_position: int,
-        temperature: float = None,
-        top_k: int = 0,
-        sample: bool = False,
+        temperature: Optional[float],
+        top_k: int,
+        sample: bool,
         return_list: bool = True,
     ):
-        """Generate a word from from out[target_po    sition]
+        """Generate a word from from out[target_position]
 
         args:
-            - out (torch.Tensor): tensor of logits     of size batch_size x seq_len x vocab_size
-            - target_position (int): location for w    hich to generate for
-            - top_k (int): if >0, only sample from     the top k most probable words
-            - sample (Bool): if True, sample from f    ull distribution. Overridden by top_k
+            - out (torch.Tensor): tensor of logits of size batch_size x seq_len x vocab_size
+            - target_position (int): location for which to generate for
+            - top_k (int): if >0, only sample from the top k most probable words
+            - sample (Bool): if True, sample from full distribution. Overridden by top_k
         """
         logits = out[:, target_position]
         if temperature is not None:

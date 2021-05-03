@@ -3,10 +3,11 @@ import logging
 from typing import Optional
 
 import torch
-from transformers import BertForPreTraining, BertTokenizer
+from transformers import BertConfig, BertForPreTraining, BertTokenizer
 
 from kart.src.modules.logging.logger import get_stream_handler
 from kart.src.modules.privacy.utils.generator import Generator
+from kart.src.modules.privacy.utils.path import get_repo_dir
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -20,7 +21,9 @@ def main():
     args = get_args()
     logger.info(vars(args))
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-    model = BertForPreTraining.from_pretrained("bert-base-uncased")
+
+    logger.info("Loading BERT model ...")
+    model = load_bert_model(args.model_code)
     model.eval()
 
     seed_text = get_prompt(
@@ -55,11 +58,30 @@ def main():
             **sample_size_config,
             **generation_config,
             **print_config,
-            cuda=True,
+            use_cuda=True,
         )
 
-    with open("generation_result.txt", "w") as f:
+    output_path = "generation_result.txt"
+
+    with open(output_path, "w") as f:
         f.writelines(bert_sents)
+
+    logger.info(f"Sentences saved to {output_path}")
+
+
+def load_bert_model(model_code: Optional[str]):
+    if model_code is None:
+        model = BertForPreTraining.from_pretrained("bert-base-uncased")
+    else:
+        model_dir = (
+            get_repo_dir()
+            / f"models/tf_bert_hospital_{model_code}/pretraining_output_stage1"
+        )
+        model_path = model_dir / "model.ckpt-100000"
+        config = BertConfig.from_pretrained("bert-base-uncased")
+        model = BertForPreTraining(config)
+        model.load_tf_weights(config, model_path)
+    return model
 
 
 def get_prompt(full_name: Optional[str], chief_complaint_length: int) -> str:
@@ -80,7 +102,12 @@ def mask(length: int) -> str:
 
 
 def get_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        "-m", "--model", "--model-code", dest="model_code", type=str, nargs="?"
+    )
     parser.add_argument("-n", "--n-samples", dest="n_samples", type=int, default=100)
     parser.add_argument("-b", "--batch-size", dest="batch_size", type=int, default=4)
     parser.add_argument("-l", "--max-length", dest="max_length", type=int, default=256)
