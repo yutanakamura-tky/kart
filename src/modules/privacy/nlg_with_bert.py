@@ -53,10 +53,15 @@ def main():
         "verbose": not args.quiet,
     }
 
+    logger.info(sample_size_config)
+    logger.info(generation_config)
+    logger.info(print_config)
+
     out_path = (
         "generation_result_"
         + f"model{'_'+args.model_code if args.model_code else ''}_"
         + f"iter_{args.max_iter}_"
+        + f"batchsize_{args.batch_size}_"
         + f"temp_{args.temperature}_topk_{args.top_k}_burnin_{args.burn_in}_len_{args.max_length}.txt"
     )
 

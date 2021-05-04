@@ -3,7 +3,7 @@ import logging
 import math
 import pathlib
 import time
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
@@ -66,6 +66,7 @@ class Generator:
         sample: bool = True,
         top_k: int = 100,
         temperature: Optional[float] = 1.0,
+        temperature_scheduler: Optional[Callable[[int], float]] = None,
         burnin: int = 200,
         max_iter: int = 500,
         use_cuda: bool = False,
@@ -87,6 +88,7 @@ class Generator:
                     max_length=max_length,
                     top_k=top_k,
                     temperature=temperature,
+                    temperature_scheduler=temperature_scheduler,
                     burnin=burnin,
                     max_iter=max_iter,
                     use_cuda=use_cuda,
@@ -103,10 +105,7 @@ class Generator:
                 start_time = time.time()
 
             with open(out_path, "a") as f:
-                if batch_n == 0:
-                    f.write("\n".join(batch))
-                else:
-                    f.write("\n" + "\n".join(batch))
+                f.write("\n".join(batch) + "\n")
 
             sentences += batch
         return sentences
@@ -121,6 +120,7 @@ class Generator:
         max_length: int,
         top_k: int,
         temperature: float,
+        temperature_scheduler: Optional[Callable[[int], float]],
         max_iter: int,
         burnin: int,
         use_cuda: bool,
@@ -154,6 +154,10 @@ class Generator:
             )
             logits = model(inp)[0]
             topk = top_k if (ii >= burnin) else 0
+            if temperature_scheduler is None:
+                temperature = temperature
+            else:
+                temperature = temperature_scheduler(ii)
             new_token_ids = cls.generate_step(
                 out=logits,
                 target_position=target_position,
