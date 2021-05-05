@@ -1,5 +1,6 @@
 import argparse
 import logging
+import pathlib
 from typing import Optional
 
 import torch
@@ -12,7 +13,7 @@ from kart.src.modules.privacy.utils.path import get_repo_dir
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 stream_handler = get_stream_handler()
-file_handler = logging.FileHandler("nlg_with_bert.log")
+file_handler = logging.FileHandler(f"{pathlib.Path(__file__).stem}.log")
 logger.addHandler(stream_handler)
 logger.addHandler(file_handler)
 

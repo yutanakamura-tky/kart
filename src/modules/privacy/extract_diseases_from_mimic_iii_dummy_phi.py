@@ -24,13 +24,12 @@ def main():
     print(f"Loading {input_path} ...")
     df = pd.read_csv(input_path, quoting=0)
 
-    full_name_mentions = df.query("patient_full_name_tfreq>0")[
-        "full_name_mention"
-    ].values
-    patient_ages = df.query("patient_full_name_tfreq>0")["patient_age"].values
-    patient_full_names = df.query("patient_full_name_tfreq>0")[
-        "patient_full_name"
-    ].values
+    df_target = df.query("patient_full_name_tfreq>0")
+
+    # subject_ids = df_target["SUBJECT_ID"].values
+    full_name_mentions = df_target["full_name_mention"].values
+    patient_ages = df_target["patient_age"].values
+    patient_full_names = df_target["patient_full_name"].values
 
     mm = pymetamap.MetaMap.get_instance(
         "/home/nakamura/metamap/public_mm/bin/metamap20",

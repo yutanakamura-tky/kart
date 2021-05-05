@@ -1,6 +1,5 @@
 import pandas as pd
 
-from kart.src.modules.privacy.utils.full_name_mentions import add_full_name_columns
 from kart.src.modules.privacy.utils.path import get_repo_dir
 
 
@@ -10,9 +9,6 @@ def main():
 
     df_hospital = df_hospital.drop("TEXT_WITH_DUMMY_PHI_SHADOW", axis="columns")
     df_shadow = df_shadow.drop("TEXT_WITH_DUMMY_PHI_HOSPITAL", axis="columns")
-
-    df_hospital = add_full_name_columns(df_hospital, "hospital")
-    df_shadow = add_full_name_columns(df_shadow, "shadow")
 
     code_to_column_suffix = {
         "c1p2": "1M",
