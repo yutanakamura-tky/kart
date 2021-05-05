@@ -7,7 +7,22 @@ from tqdm import tqdm
 from kart.src.modules.privacy.utils.path import get_repo_dir
 
 
-def add_full_name_columns(df: pd.DataFrame, mode: str) -> pd.DataFrame:
+def load_placeholder_info_mapping(mode: str) -> Dict[str, str]:
+    mapping_path = get_repo_dir() / f"corpus/tmp/dummy_phi/{mode}/surrogate_map.csv"
+    print(f"Loading {mapping_path} ...")
+    df_map = pd.read_csv(
+        mapping_path, header=None, quoting=0, names=["placeholder", "dummy_phi"]
+    )
+    mapping = {
+        df_map.iloc[i].loc["placeholder"]: df_map.iloc[i].loc["dummy_phi"]
+        for i in tqdm(range(len(df_map)))
+    }
+    return mapping
+
+
+def add_full_name_columns(
+    df: pd.DataFrame, placeholder_mapping: Dict[str, str]
+) -> pd.DataFrame:
     """
     mode: 'hospital' or 'shadow'
     """
@@ -28,20 +43,12 @@ def add_full_name_columns(df: pd.DataFrame, mode: str) -> pd.DataFrame:
         df[key_name] = patient_info.progress_apply(lambda x: x[key_name])
         print(f"Added column '{key_name}'")
 
-    mapping_path = get_repo_dir() / f"corpus/tmp/dummy_phi/{mode}/surrogate_map.csv"
-    print(f"Loading {mapping_path} ...")
-    df_map = pd.read_csv(
-        mapping_path, header=None, quoting=0, names=["placeholder", "dummy_phi"]
-    )
-    mapping = {
-        df_map.iloc[i].loc["placeholder"]: df_map.iloc[i].loc["dummy_phi"]
-        for i in tqdm(range(len(df_map)))
-    }
-
     df["patient_full_name"] = patient_info.progress_apply(
-        lambda x: (
-            mapping.get(x["first_name_placeholder"]),
-            mapping.get(x["last_name_placeholder"]),
+        lambda x: " ".join(
+            [
+                placeholder_mapping.get(x["first_name_placeholder"], ""),
+                placeholder_mapping.get(x["last_name_placeholder"], ""),
+            ]
         )
     )
     print("Added column 'patient_full_name'")

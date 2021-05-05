@@ -75,7 +75,7 @@ def main():
                     dict_values = [
                         ("document_id", i),
                         ("subject_id", subject_ids[i]),
-                        ("patient_full_name", " ".join(eval(patient_full_names[i]))),
+                        ("patient_full_name", patient_full_names[i]),
                         ("patiant_age", patient_ages[i]),
                         ("superficials", ", ".join(superficials)),
                         ("semtypes", concept.semtypes),

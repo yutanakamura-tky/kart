@@ -57,7 +57,7 @@ class Generator:
         n_samples: int,
         model: transformers.models.bert.modeling_bert.BertForPreTraining,
         tokenizer: transformers.models.bert.tokenization_bert.BertTokenizer,
-        seed_text: List[List[str]],
+        seed_texts: Union[str, List[str]],
         out_path: Union[str, pathlib.PosixPath],
         batch_size: int = 10,
         max_length: int = 25,
@@ -78,7 +78,17 @@ class Generator:
         sentences = []
         n_batches = math.ceil(n_samples / batch_size)
         start_time = time.time()
+
         for batch_n in range(n_batches):
+            if type(seed_texts) is str:
+                seed_text = seed_texts
+            elif type(seed_texts) is list:
+                seed_ix = batch_n % len(seed_texts)
+                seed_text = seed_texts[seed_ix]
+
+            if logger:
+                logger.info(f"Seed text: {seed_text}")
+
             if generation_mode == "parallel-sequential":
                 batch = cls.parallel_sequential_generation(
                     seed_text,
@@ -127,7 +137,7 @@ class Generator:
         print_every_iter: int,
         verbose: bool,
         sample: bool,
-        logger: Optional[logging.Logger] = None,
+        logger: logging.Logger,
     ) -> List[str]:
         """Generate for one random position at a timestep
 
@@ -169,12 +179,12 @@ class Generator:
                 input_ids[jj][target_position] = new_token_ids[jj]
 
             if verbose and np.mod(ii + 1, print_every_iter) == 0:
-                print(f'{"="*30} Iter {ii+1} {"="*30}')
+                logger.info(f'{"="*30} Iter {ii+1} {"="*30}')
                 if logger:
                     logger.info(
                         f"Number of [MASK] tokens: {sum(map(lambda x: x==MASK_ID, input_ids[0]))}"
                     )
-                print([tokenizer.decode(token_ids) for token_ids in input_ids])
+                logger.info([tokenizer.decode(token_ids) for token_ids in input_ids])
 
         return [tokenizer.decode(token_ids) for token_ids in input_ids]
 

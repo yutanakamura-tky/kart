@@ -3,6 +3,7 @@ import logging
 import pathlib
 from typing import Optional
 
+import pandas as pd
 import torch
 from transformers import BertConfig, BertForPreTraining, BertTokenizer
 
@@ -26,11 +27,6 @@ def main():
     logger.info("Loading BERT model ...")
     model = load_bert_model(args.model_code)
     model.eval()
-
-    seed_text = get_prompt(
-        full_name=None, chief_complaint_length=args.chief_complaint_length
-    )
-    logger.info(f"seed text: {seed_text}")
 
     sample_size_config = {
         "n_samples": args.n_samples,
@@ -58,29 +54,72 @@ def main():
     logger.info(generation_config)
     logger.info(print_config)
 
-    out_path = (
+    out_path = get_save_path(args)
+
+    if args.full_name_source:
+        full_names = pd.read_csv(args.full_name_source, sep="\t")[
+            "patient_full_name"
+        ].values.tolist()
+        prompts = [
+            get_prompt(
+                full_name=full_name, chief_complaint_length=args.chief_complaint_length
+            )
+            for full_name in full_names
+        ]
+
+        with torch.cuda.device(args.cuda_device_number):
+            model.to("cuda")
+            Generator.generate(
+                model=model,
+                tokenizer=tokenizer,
+                seed_texts=prompts,
+                **sample_size_config,
+                **generation_config,
+                **print_config,
+                use_cuda=True,
+                logger=logger,
+                out_path=out_path,
+            )
+
+    else:
+        prompt = get_prompt(
+            full_name=None, chief_complaint_length=args.chief_complaint_length
+        )
+
+        with torch.cuda.device(args.cuda_device_number):
+            model.to("cuda")
+            Generator.generate(
+                model=model,
+                tokenizer=tokenizer,
+                seed_texts=prompt,
+                **sample_size_config,
+                **generation_config,
+                **print_config,
+                use_cuda=True,
+                logger=logger,
+                out_path=out_path,
+            )
+
+    logger.info(f"Sentences saved to {out_path}")
+
+
+def get_save_path(args: argparse.Namespace) -> pathlib.PosixPath:
+    out_dir = get_repo_dir() / "src/modules/privacy"
+    out_basename = (
         "generation_result_"
         + f"model{'_'+args.model_code if args.model_code else ''}_"
         + f"iter_{args.max_iter}_"
         + f"batchsize_{args.batch_size}_"
-        + f"temp_{args.temperature}_topk_{args.top_k}_burnin_{args.burn_in}_len_{args.max_length}.txt"
+        + f"temp_{args.temperature}_topk_{args.top_k}_burnin_{args.burn_in}_len_{args.max_length}"
     )
 
-    with torch.cuda.device(args.cuda_device_number):
-        model.to("cuda")
-        Generator.generate(
-            model=model,
-            tokenizer=tokenizer,
-            seed_text=seed_text,
-            **sample_size_config,
-            **generation_config,
-            **print_config,
-            use_cuda=True,
-            logger=logger,
-            out_path=out_path,
-        )
+    if args.full_name_source:
+        out_basename += "_with_full_name_knowledge.txt"
+    else:
+        out_basename += "_without_full_name_knowledge.txt"
 
-    logger.info(f"Sentences saved to {out_path}")
+    out_path = out_dir / out_basename
+    return out_path
 
 
 def load_bert_model(model_code: Optional[str]) -> BertForPreTraining:
@@ -115,9 +154,18 @@ def mask(length: int) -> str:
     return " ".join(["[MASK]"] * length)
 
 
-def get_args():
+def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        "--full-name-source",
+        dest="full_name_source",
+        type=str,
+        nargs="?",
+        help="To simulate that the attacker already knows full names of the subjects, "
+        + "specify path of TSV files containing patient full names in 'patient_full_name' column."
+        + "To simulate that the attacker does not know full names of the subjects, leave this blank.",
     )
     parser.add_argument(
         "-m", "--model", "--model-code", dest="model_code", type=str, nargs="?"
