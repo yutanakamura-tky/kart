@@ -7,14 +7,14 @@ import pandas as pd
 import torch
 from transformers import BertConfig, BertForPreTraining, BertTokenizer
 
-from kart.src.modules.logging.logger import get_stream_handler
+from kart.src.modules.logging.logger import get_file_handler, get_stream_handler
 from kart.src.modules.privacy.utils.generator import Generator
 from kart.src.modules.privacy.utils.path import get_repo_dir
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 stream_handler = get_stream_handler()
-file_handler = logging.FileHandler(f"{pathlib.Path(__file__).stem}.log")
+file_handler = get_file_handler(f"{pathlib.Path(__file__).stem}.log")
 logger.addHandler(stream_handler)
 logger.addHandler(file_handler)
 
@@ -25,7 +25,7 @@ def main():
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
     logger.info("Loading BERT model ...")
-    model = load_bert_model(args.model_code)
+    model = load_bert_model(args.model_code, hipaa=args.hipaa)
     model.eval()
 
     sample_size_config = {
@@ -114,23 +114,30 @@ def get_save_path(args: argparse.Namespace) -> pathlib.PosixPath:
     )
 
     if args.full_name_source:
-        out_basename += "_with_full_name_knowledge.txt"
+        out_basename += "_fullname_known"
     else:
-        out_basename += "_without_full_name_knowledge.txt"
+        out_basename += "_fullname_unknown"
+
+    if args.hipaa:
+        out_basename += "_hipaa.txt"
+    else:
+        out_basename += "_no_anonymization.txt"
 
     out_path = out_dir / out_basename
     return out_path
 
 
-def load_bert_model(model_code: Optional[str]) -> BertForPreTraining:
+def load_bert_model(
+    model_code: Optional[str], hipaa: bool = False
+) -> BertForPreTraining:
     if model_code is None:
         model = BertForPreTraining.from_pretrained("bert-base-uncased")
     else:
         model_dir = (
-            get_repo_dir()
-            / f"models/tf_bert_hospital_{model_code}/pretraining_output_stage1"
+            get_repo_dir() / f"models/tf_bert_scratch_hospital_{model_code}_"
+            + f"{'hipaa' if hipaa else 'no_anonymization'}/pretraining_output_stage1"
         )
-        model_path = model_dir / "model.ckpt-100000"
+        model_path = model_dir / "model.ckpt-1000000"
         config = BertConfig.from_pretrained("bert-base-uncased")
         model = BertForPreTraining(config)
         model.load_tf_weights(config, model_path)
@@ -159,6 +166,7 @@ def get_args() -> argparse.Namespace:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
+        "-f",
         "--full-name-source",
         dest="full_name_source",
         type=str,
@@ -168,7 +176,19 @@ def get_args() -> argparse.Namespace:
         + "To simulate that the attacker does not know full names of the subjects, leave this blank.",
     )
     parser.add_argument(
-        "-m", "--model", "--model-code", dest="model_code", type=str, nargs="?"
+        "-m",
+        "--model",
+        "--model-code",
+        dest="model_code",
+        type=str,
+        nargs="?",
+        help="Specify BERT model code ('c1p2', 'c1p1', 'c1p0', 'c0p2', 'c0p1', 'c0p0')",
+    )
+    parser.add_argument(
+        "--hipaa",
+        dest="hipaa",
+        action="store_true",
+        help="If set True, BERT model pre-trained with anonymized data will be used",
     )
     parser.add_argument("-n", "--n-samples", dest="n_samples", type=int, default=100)
     parser.add_argument("-b", "--batch-size", dest="batch_size", type=int, default=4)

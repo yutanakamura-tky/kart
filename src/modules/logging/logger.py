@@ -4,22 +4,6 @@ import pathlib
 import sys
 
 
-def get_datetime_datetime_now() -> datetime.datetime:
-    """
-    Get current year, month, & date in datetime.datetime
-    """
-    jst = datetime.timezone(datetime.timedelta(hours=9))
-    return datetime.datetime.now(jst)
-
-
-def get_time_struct_time_now(*args) -> datetime.datetime:
-    """
-    Get current year, month, date, & time in time.struct_time
-    Passing this function to logging.Formatter().converter attribute will change logging time from GMT to JST.
-    """
-    return get_datetime_datetime_now().timetuple()
-
-
 def get_stream_handler(level: int = logging.INFO) -> logging.Handler:
     plain_log_formatter = logging.Formatter("{message}", style="{")
     plain_log_formatter.converter = get_time_struct_time_now
@@ -41,3 +25,19 @@ def get_file_handler(
     file_handler.setLevel(level)
     file_handler.setFormatter(datetime_log_formatter)
     return file_handler
+
+
+def get_datetime_datetime_now() -> datetime.datetime:
+    """
+    Get current year, month, & date in datetime.datetime
+    """
+    jst = datetime.timezone(datetime.timedelta(hours=9))
+    return datetime.datetime.now(jst)
+
+
+def get_time_struct_time_now(*args) -> datetime.datetime:
+    """
+    Get current year, month, date, & time in time.struct_time
+    Passing this function to logging.Formatter().converter attribute will change logging time from GMT to JST.
+    """
+    return get_datetime_datetime_now().timetuple()

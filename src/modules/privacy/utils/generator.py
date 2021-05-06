@@ -105,6 +105,7 @@ class Generator:
                     verbose=verbose,
                     print_every_iter=print_every_iter,
                     sample=sample,
+                    logger=logger,
                 )
 
             if (batch_n + 1) % print_every_batch == 0:
@@ -184,7 +185,7 @@ class Generator:
                     logger.info(
                         f"Number of [MASK] tokens: {sum(map(lambda x: x==MASK_ID, input_ids[0]))}"
                     )
-                logger.info([tokenizer.decode(token_ids) for token_ids in input_ids])
+                logger.info(tokenizer.decode(input_ids[0]))
 
         return [tokenizer.decode(token_ids) for token_ids in input_ids]
 

@@ -1,16 +1,20 @@
+# isort: skip_file
+# (To prevent conflict of isort and black)
 import itertools
 import logging
 import pathlib
-import re
 from collections import OrderedDict
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List
 
-import nltk
 import pandas as pd
 from tqdm import tqdm
 
 from kart.src.modules.logging.logger import get_stream_handler
 from kart.src.modules.privacy.utils.path import get_repo_dir
+from kart.src.modules.privacy.utils.umls import (
+    extract_umls_concepts,
+    get_metamap_instance,
+)
 from kart.src.modules.pymetamap import pymetamap
 
 logger = logging.getLogger(__name__)
@@ -29,9 +33,13 @@ def main():
                 get_repo_dir()
                 / f"corpus/full_name_mentions_{mode.lower()}_{code.lower()}.tsv"
             )
-            output_path = (
+            disease_output_path = (
                 get_repo_dir()
                 / f"corpus/gold_disease_names_{mode.lower()}_{code.lower()}.tsv"
+            )
+            full_name_output_path = (
+                get_repo_dir()
+                / f"corpus/gold_full_names_{mode.lower()}_{code.lower()}.tsv"
             )
 
             logger.info(f"Loading {input_path} ...")
@@ -87,99 +95,17 @@ def main():
                     diseases.append(disease)
 
             df_diseases = pd.DataFrame(diseases)
-            df_diseases.to_csv(output_path, index=False, sep="\t")
-            logger.info(f"Disease name saved to {output_path}")
+            df_diseases.to_csv(disease_output_path, index=False, sep="\t")
+            logger.info(f"Disease names saved to {disease_output_path}")
 
+            df_full_name = df_diseases.drop_duplicates(subset="patient_full_name")
 
-def get_metamap_instance() -> pymetamap.SubprocessBackend:
-    mm = pymetamap.MetaMap.get_instance(
-        "/home/nakamura/metamap/public_mm/bin/metamap20",
-    )
-    return mm
-
-
-def extract_umls_concepts(
-    texts: List[str], mm: pymetamap.SubprocessBackend, option: Dict = {}
-) -> List[List[Dict]]:
-    result = [
-        extract_umls_concepts_from_one_text(text, mm, option) for text in tqdm(texts)
-    ]
-    return result
-
-
-def extract_umls_concepts_from_one_text(
-    text: str, mm: pymetamap.SubprocessBackend, option: Dict = {}
-) -> List[Dict]:
-    sentences = text_to_sentences(text)
-    concepts, error = mm.extract_concepts(sentences, range(len(sentences)), **option)
-    entities = convert_concepts_to_superficial_concept_pairs(concepts, sentences)
-    entities = drop_invalid_concepts(entities)
-    return entities
-
-
-def text_to_sentences(text: str) -> List[str]:
-    tokenizer = nltk.tokenize.punkt.PunktSentenceTokenizer()
-    sentences = tokenizer.sentences_from_text(text)
-    return sentences
-
-
-def drop_invalid_concepts(superficial_concept_pairs: List[Dict]) -> List[Dict]:
-    """
-    MetaMap is sometimes too sensitive and recognizes non-disease spans as diseases.
-    This function gets rid of such excessive entries with rule based approach.
-    """
-    result = []
-    for pair in superficial_concept_pairs:
-        superficials = pair["superficials"]
-        non_disease_superficials = (
-            "was",
-            "IV",
-            "arms",
-            "call",
-            "NS",
-            "NC",
-            "a, o",
-            "this",
-        )
-        if set(superficials) & set(non_disease_superficials):
-            continue
-        else:
-            result.append(pair)
-    return result
-
-
-def convert_concepts_to_superficial_concept_pairs(
-    concepts: List[Union[pymetamap.Concept.ConceptMMI, pymetamap.Concept.ConceptAA]],
-    sentences: List[str],
-) -> List[Dict]:
-    """
-    Pymetamap does not return directly spans corresponding to each UMLS concept.
-    This function thus extracts such spans and returns pairs of UMLS concepts and spans.
-    """
-    entities = []
-
-    for concept in concepts:
-        if type(concept) is pymetamap.Concept.ConceptMMI:
-            sentence_id = int(concept.index)
-            raw_pos_info: List[Tuple[str, str]] = re.findall(
-                r"(\d+)/(\d+)", concept.pos_info
-            )
-            positions = [
-                {
-                    "start": int(pos_info[0]) - 1,
-                    "end": int(pos_info[0]) + int(pos_info[1]) - 1,
-                }
-                for pos_info in raw_pos_info
-            ]
-            superficials = [
-                sentences[sentence_id][pos["start"] : pos["end"]] for pos in positions
-            ]
-            entities.append({"superficials": superficials, "concept": concept})
-        elif type(concept) is pymetamap.Concept.ConceptAA:
-            continue
-        else:
-            continue
-    return entities
+            if len(df_full_name) > 0:
+                df_full_name = df_full_name.loc[
+                    :, ["document_id", "subject_id", "patient_full_name"]
+                ]
+            df_full_name.to_csv(full_name_output_path, index=False, sep="\t")
+            logger.info(f"Gold full names saved to {full_name_output_path}")
 
 
 if __name__ == "__main__":
