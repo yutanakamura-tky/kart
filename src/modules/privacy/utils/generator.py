@@ -26,18 +26,27 @@ class SeedTextProcessor:
         initial_input_ids = initial_tokenization_result["input_ids"]
 
         # Note: seed_length does not include '[CLS]' and '[SEP]' tokens
-        seed_length = sum(initial_tokenization_result["attention_mask"][0]) - 2
-        if seed_length == max_length - 2:
-            return (initial_input_ids, seed_length)
-        else:
+        initial_seed_length = sum(initial_tokenization_result["attention_mask"][0]) - 2
+        if initial_seed_length == max_length - 2:
+            return (initial_input_ids, initial_seed_length)
+        elif initial_seed_length > max_length - 2:
+            # When seed text is too long, truncate
+            truncated_input_ids = [
+                input_ids[: max_length - 1] + [input_ids[-1]]
+                for input_ids in initial_input_ids
+            ]
+            seed_length = max_length - 2
+            return (truncated_input_ids, seed_length)
+        elif initial_seed_length < max_length - 2:
+            # When seed text is short, pad with [MASK] tokens
             padded_batch: List[str] = cls.pad_with_mask_tokens(
-                batch, max_length - seed_length - 2
+                batch, max_length - initial_seed_length - 2
             )
             padded_tokenization_result: Dict = tokenizer.batch_encode_plus(
                 padded_batch, padding="max_length", max_length=max_length
             )
             padded_input_ids = padded_tokenization_result["input_ids"]
-            return (padded_input_ids, seed_length)
+            return (padded_input_ids, initial_seed_length)
 
     @staticmethod
     def duplicate_seed_text(seed_text: str, batch_size: int) -> List[str]:

@@ -156,7 +156,9 @@ def load_bert_model(
     return model
 
 
-def get_prompt(full_name: Optional[str], full_name_mention: Optional[str]) -> str:
+def get_prompt(
+    full_name: Optional[str] = None, full_name_mention: Optional[str] = None
+) -> str:
 
     if full_name_mention:
         prompt = convert_full_name_mention_to_prompt(full_name_mention)
