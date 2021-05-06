@@ -109,7 +109,7 @@ class Generator:
                 )
 
             if (batch_n + 1) % print_every_batch == 0:
-                print(
+                logger.info(
                     "Finished batch %d in %.3fs"
                     % (batch_n + 1, time.time() - start_time)
                 )
@@ -182,8 +182,9 @@ class Generator:
             if verbose and np.mod(ii + 1, print_every_iter) == 0:
                 logger.info(f'{"="*30} Iter {ii+1} {"="*30}')
                 if logger:
+                    n_mask_tokens = (np.array(input_ids) == MASK_ID).sum(axis=1)
                     logger.info(
-                        f"Number of [MASK] tokens: {sum(map(lambda x: x==MASK_ID, input_ids[0]))}"
+                        "Average number of [MASK] tokens: " + f"{n_mask_tokens.mean()}"
                     )
                 logger.info(tokenizer.decode(input_ids[0]))
 

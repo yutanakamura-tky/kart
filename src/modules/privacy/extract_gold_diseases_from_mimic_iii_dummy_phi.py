@@ -90,6 +90,7 @@ def main():
                         ("score", concept.score),
                         ("cui", concept.cui),
                         ("perferred_name", concept.preferred_name),
+                        ("full_name_mention", full_name_mentions[i]),
                     ]
                     disease = OrderedDict(dict_values)
                     diseases.append(disease)
@@ -102,7 +103,13 @@ def main():
 
             if len(df_full_name) > 0:
                 df_full_name = df_full_name.loc[
-                    :, ["document_id", "subject_id", "patient_full_name"]
+                    :,
+                    [
+                        "document_id",
+                        "subject_id",
+                        "patient_full_name",
+                        "full_name_mention",
+                    ],
                 ]
             df_full_name.to_csv(full_name_output_path, index=False, sep="\t")
             logger.info(f"Gold full names saved to {full_name_output_path}")

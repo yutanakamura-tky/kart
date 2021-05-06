@@ -25,5 +25,10 @@ python extract_full_name_mentions_from_mimic_iii_dummy_phi.py
 
 #### 2-1-3. Extract disease names from full name mentions.  
 ```sh
-python extract_diseases_from_mimic_iii_dummy_phi.py
+python extract_gold_diseases_from_mimic_iii_dummy_phi.py
+```
+
+#### 2-1-4. Extract disease names from full name mentions.  
+```sh
+python nlg_without_r.py --model-code c0p2
 ```

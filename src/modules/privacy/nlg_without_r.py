@@ -1,6 +1,7 @@
 import argparse
 import logging
 import pathlib
+import re
 from typing import Optional
 
 import pandas as pd
@@ -8,6 +9,7 @@ import torch
 from transformers import BertConfig, BertForPreTraining, BertTokenizer
 
 from kart.src.modules.logging.logger import get_file_handler, get_stream_handler
+from kart.src.modules.privacy.utils.full_name_mentions import regexp_for_name
 from kart.src.modules.privacy.utils.generator import Generator
 from kart.src.modules.privacy.utils.path import get_repo_dir
 
@@ -56,16 +58,23 @@ def main():
 
     out_path = get_save_path(args)
 
-    if args.full_name_source:
-        full_names = pd.read_csv(args.full_name_source, sep="\t")[
-            "patient_full_name"
-        ].values.tolist()
-        prompts = [
-            get_prompt(
-                full_name=full_name, chief_complaint_length=args.chief_complaint_length
-            )
-            for full_name in full_names
-        ]
+    if args.use_full_name_knowledge or args.use_corpus:
+        patient_info_path = (
+            get_repo_dir() / f"corpus/gold_full_names_hospital_{args.model_code}.tsv"
+        )
+
+        df_patient_info = pd.read_csv(patient_info_path, sep="\t")
+        full_names = df_patient_info["patient_full_name"].values.tolist()
+        full_name_mentions = df_patient_info["full_name_mention"].values.tolist()
+
+        if args.use_full_name_knowledge:
+            prompts = [get_prompt(full_name=full_name) for full_name in full_names]
+
+        else:
+            prompts = [
+                get_prompt(full_name_mention=full_name_mention)
+                for full_name_mention in full_name_mentions
+            ]
 
         with torch.cuda.device(args.cuda_device_number):
             model.to("cuda")
@@ -82,9 +91,7 @@ def main():
             )
 
     else:
-        prompt = get_prompt(
-            full_name=None, chief_complaint_length=args.chief_complaint_length
-        )
+        prompt = get_prompt(full_name=None)
 
         with torch.cuda.device(args.cuda_device_number):
             model.to("cuda")
@@ -113,10 +120,15 @@ def get_save_path(args: argparse.Namespace) -> pathlib.PosixPath:
         + f"temp_{args.temperature}_topk_{args.top_k}_burnin_{args.burn_in}_len_{args.max_length}"
     )
 
-    if args.full_name_source:
+    if args.use_full_name_knowledge:
         out_basename += "_fullname_known"
     else:
         out_basename += "_fullname_unknown"
+
+    if args.use_corpus:
+        out_basename += "_corpus_used"
+    else:
+        out_basename += "_corpus_unused"
 
     if args.hipaa:
         out_basename += "_hipaa.txt"
@@ -133,8 +145,8 @@ def load_bert_model(
     if model_code is None:
         model = BertForPreTraining.from_pretrained("bert-base-uncased")
     else:
-        model_dir = (
-            get_repo_dir() / f"models/tf_bert_scratch_hospital_{model_code}_"
+        model_dir = get_repo_dir() / (
+            f"models/tf_bert_scratch_hospital_{model_code}_"
             + f"{'hipaa' if hipaa else 'no_anonymization'}/pretraining_output_stage1"
         )
         model_path = model_dir / "model.ckpt-1000000"
@@ -144,17 +156,30 @@ def load_bert_model(
     return model
 
 
-def get_prompt(full_name: Optional[str], chief_complaint_length: int) -> str:
-    prompt = ""
+def get_prompt(full_name: Optional[str], full_name_mention: Optional[str]) -> str:
 
-    if full_name is None:
-        prompt += f"{mask(2)}"
+    if full_name_mention:
+        prompt = convert_full_name_mention_to_prompt(full_name_mention)
+
     else:
-        prompt += full_name
-
-    prompt += f" is a {mask(1)} year-old {mask(1)} presented with {mask(chief_complaint_length)}. "
-    prompt += "The patient has a history of"
+        prompt = ""
+        if full_name is None:
+            prompt += f"{mask(2)}"
+        else:
+            prompt += full_name
+        prompt += f" is a {mask(1)} year-old {mask(1)} presented with"
     return prompt
+
+
+def convert_full_name_mention_to_prompt(text: str) -> str:
+    text = text.replace("\n", "")
+    text = re.sub(
+        r"^" + regexp_for_name("first", False) + " " + regexp_for_name("last", False),
+        "[MASK] [MASK]",
+        text,
+    )
+    text = re.sub(r"\[\*\*.+?\*\*\]", "", text)
+    return text
 
 
 def mask(length: int) -> str:
@@ -166,14 +191,16 @@ def get_args() -> argparse.Namespace:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
-        "-f",
-        "--full-name-source",
-        dest="full_name_source",
-        type=str,
-        nargs="?",
-        help="To simulate that the attacker already knows full names of the subjects, "
-        + "specify path of TSV files containing patient full names in 'patient_full_name' column."
-        + "To simulate that the attacker does not know full names of the subjects, leave this blank.",
+        "--use-full-name-knowledge",
+        dest="use_full_name_knowledge",
+        action="store_true",
+        help="If set True, the prior knowledge (full names of the subjects) will be used for privacy attack.",
+    )
+    parser.add_argument(
+        "--use-corpus",
+        dest="use_corpus",
+        action="store_true",
+        help="If set True, the anonymized version of the pre-training data will be used for privacy attack.",
     )
     parser.add_argument(
         "-m",
@@ -195,13 +222,6 @@ def get_args() -> argparse.Namespace:
     parser.add_argument("-l", "--max-length", dest="max_length", type=int, default=256)
     parser.add_argument(
         "-C", "--cuda-device-number", dest="cuda_device_number", type=int, default=1
-    )
-    parser.add_argument(
-        "-c",
-        "--chief-complaint-length",
-        dest="chief_complaint_length",
-        type=int,
-        default=110,
     )
     parser.add_argument("-k", "--top-k", dest="top_k", type=int, default=100)
     parser.add_argument(
