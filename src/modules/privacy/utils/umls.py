@@ -17,6 +17,7 @@ def get_metamap_instance() -> pymetamap.SubprocessBackend:
 def extract_umls_concepts(
     texts: List[str], mm: pymetamap.SubprocessBackend, option: Dict = {}
 ) -> List[List[Dict]]:
+
     result = [
         extract_umls_concepts_from_one_text(text, mm, option) for text in tqdm(texts)
     ]

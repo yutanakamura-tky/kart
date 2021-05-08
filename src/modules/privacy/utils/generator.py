@@ -7,7 +7,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
-import transformers
+from transformers import BertForPreTraining, BertTokenizer
 
 
 class SeedTextProcessor:
@@ -15,7 +15,7 @@ class SeedTextProcessor:
     def seed_text_to_token_ids(
         cls,
         seed_text: str,
-        tokenizer: transformers.models.bert.tokenization_bert.BertTokenizer,
+        tokenizer: BertTokenizer,
         max_length: int,
         batch_size: int,
     ) -> Tuple[List[List[int]], int]:
@@ -64,8 +64,8 @@ class Generator:
     def generate(
         cls,
         n_samples: int,
-        model: transformers.models.bert.modeling_bert.BertForPreTraining,
-        tokenizer: transformers.models.bert.tokenization_bert.BertTokenizer,
+        model: BertForPreTraining,
+        tokenizer: BertTokenizer,
         seed_texts: Union[str, List[str]],
         out_path: Union[str, pathlib.PosixPath],
         batch_size: int = 10,
@@ -134,8 +134,8 @@ class Generator:
     def parallel_sequential_generation(
         cls,
         seed_text: str,
-        model: transformers.models.bert.modeling_bert.BertForPreTraining,
-        tokenizer: transformers.models.bert.tokenization_bert.BertTokenizer,
+        model: BertForPreTraining,
+        tokenizer: BertTokenizer,
         batch_size: int,
         max_length: int,
         top_k: int,

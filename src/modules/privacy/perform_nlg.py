@@ -27,7 +27,7 @@ def main():
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
     logger.info("Loading BERT model ...")
-    model = load_bert_model(args.model_code, hipaa=args.hipaa)
+    model = load_bert_model(args.model_code, hipaa=args.hipaa, scratch=args.scratch)
     model.eval()
 
     sample_size_config = {
@@ -135,21 +135,33 @@ def get_save_path(args: argparse.Namespace) -> pathlib.PosixPath:
     else:
         out_basename += "_no_anonymization.txt"
 
+    if args.scratch:
+        out_basename += "_scratch.txt"
+    else:
+        out_basename += "_finetuned.txt"
+
     out_path = out_dir / out_basename
     return out_path
 
 
 def load_bert_model(
-    model_code: Optional[str], hipaa: bool = False
+    model_code: Optional[str], hipaa: bool = False, scratch: bool = False
 ) -> BertForPreTraining:
     if model_code is None:
         model = BertForPreTraining.from_pretrained("bert-base-uncased")
     else:
-        model_dir = get_repo_dir() / (
-            f"models/tf_bert_scratch_hospital_{model_code}_"
-            + f"{'hipaa' if hipaa else 'no_anonymization'}/pretraining_output_stage1"
-        )
-        model_path = model_dir / "model.ckpt-1000000"
+        if scratch:
+            model_dir = get_repo_dir() / (
+                f"models/tf_bert_scratch_hospital_{model_code}_"
+                + f"{'hipaa' if hipaa else 'no_anonymization'}/pretraining_output_stage1"
+            )
+            model_path = model_dir / "model.ckpt-1000000"
+        else:
+            model_dir = get_repo_dir() / (
+                f"models/tf_bert_fine_tuned_hospital_{model_code}_"
+                + f"{'hipaa' if hipaa else 'no_anonymization'}/pretraining_output_stage1"
+            )
+            model_path = model_dir / "model.ckpt-100000"
         config = BertConfig.from_pretrained("bert-base-uncased")
         model = BertForPreTraining(config)
         model.load_tf_weights(config, model_path)
@@ -218,6 +230,12 @@ def get_args() -> argparse.Namespace:
         dest="hipaa",
         action="store_true",
         help="If set True, BERT model pre-trained with anonymized data will be used",
+    )
+    parser.add_argument(
+        "--scratch",
+        dest="scratch",
+        action="store_true",
+        help="If set True, BERT model pre-trained from scrath will be used, instead of fine-tuned model",
     )
     parser.add_argument("-n", "--n-samples", dest="n_samples", type=int, default=100)
     parser.add_argument("-b", "--batch-size", dest="batch_size", type=int, default=4)
