@@ -37,13 +37,13 @@ def main():
     }
 
     generation_config = {
+        "sequential": args.sequential,
         "top_k": args.top_k,
         "temperature": args.temperature,
         "burnin": args.burn_in,
         "max_iter": args.max_iter,
         "sample": True,
         "leed_out_len": 5,
-        "generation_mode": "parallel-sequential",
     }
 
     print_config = {
@@ -117,6 +117,7 @@ def get_save_path(args: argparse.Namespace) -> pathlib.PosixPath:
         + f"model{'_'+args.model_code if args.model_code else ''}_"
         + f"iter_{args.max_iter}_"
         + f"batchsize_{args.batch_size}_"
+        + f"sequential_{args.sequential}_"
         + f"temp_{args.temperature}_topk_{args.top_k}_burnin_{args.burn_in}_len_{args.max_length}"
     )
 
@@ -242,6 +243,14 @@ def get_args() -> argparse.Namespace:
     parser.add_argument("-l", "--max-length", dest="max_length", type=int, default=256)
     parser.add_argument(
         "-C", "--cuda-device-number", dest="cuda_device_number", type=int, default=1
+    )
+    parser.add_argument(
+        "-s",
+        "--sequential",
+        dest="sequential",
+        type=str,
+        default="never",
+        choices=["always", "first", "never"],
     )
     parser.add_argument("-k", "--top-k", dest="top_k", type=int, default=100)
     parser.add_argument(

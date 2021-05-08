@@ -28,7 +28,15 @@ def extract_umls_concepts_from_one_text(
     text: str, mm: pymetamap.SubprocessBackend, option: Dict = {}
 ) -> List[Dict]:
     sentences = text_to_sentences(text)
-    concepts, error = mm.extract_concepts(sentences, range(len(sentences)), **option)
+
+    try:
+        concepts, error = mm.extract_concepts(
+            sentences, range(len(sentences)), **option
+        )
+    except IndexError:
+        # pymetamap raises IndexError when invalid characters exist in the text
+        concepts = []
+
     entities = convert_concepts_to_superficial_concept_pairs(concepts, sentences)
     entities = drop_invalid_concepts(entities)
     return entities

@@ -1,4 +1,3 @@
-import copy
 import logging
 import math
 import pathlib
@@ -70,8 +69,8 @@ class Generator:
         out_path: Union[str, pathlib.PosixPath],
         batch_size: int = 10,
         max_length: int = 25,
+        sequential: str = "never",
         leed_out_len: int = 15,
-        generation_mode: str = "parallel-sequential",
         sample: bool = True,
         top_k: int = 100,
         temperature: Optional[float] = 1.0,
@@ -84,6 +83,13 @@ class Generator:
         verbose: bool = True,
         logger: Optional[logging.Logger] = None,
     ) -> List[str]:
+        """
+        sequential: ('always', 'first', 'never')
+        - 'always': Always generated in L->R order.
+        - 'first': First generated in L->R order till the end. Generated in random positions afterwards.
+        - 'never': Always generated in random positions.
+        """
+
         sentences = []
         n_batches = math.ceil(n_samples / batch_size)
         start_time = time.time()
@@ -98,24 +104,24 @@ class Generator:
             if logger:
                 logger.info(f"Seed text: {seed_text}")
 
-            if generation_mode == "parallel-sequential":
-                batch = cls.parallel_sequential_generation(
-                    seed_text,
-                    model=model,
-                    tokenizer=tokenizer,
-                    batch_size=batch_size,
-                    max_length=max_length,
-                    top_k=top_k,
-                    temperature=temperature,
-                    temperature_scheduler=temperature_scheduler,
-                    burnin=burnin,
-                    max_iter=max_iter,
-                    use_cuda=use_cuda,
-                    verbose=verbose,
-                    print_every_iter=print_every_iter,
-                    sample=sample,
-                    logger=logger,
-                )
+            batch = cls.parallel_sequential_generation(
+                seed_text,
+                model=model,
+                tokenizer=tokenizer,
+                batch_size=batch_size,
+                max_length=max_length,
+                sequential=sequential,
+                top_k=top_k,
+                temperature=temperature,
+                temperature_scheduler=temperature_scheduler,
+                burnin=burnin,
+                max_iter=max_iter,
+                use_cuda=use_cuda,
+                verbose=verbose,
+                print_every_iter=print_every_iter,
+                sample=sample,
+                logger=logger,
+            )
 
             if (batch_n + 1) % print_every_batch == 0:
                 logger.info(
@@ -138,6 +144,7 @@ class Generator:
         tokenizer: BertTokenizer,
         batch_size: int,
         max_length: int,
+        sequential: str,
         top_k: int,
         temperature: float,
         temperature_scheduler: Optional[Callable[[int], float]],
@@ -149,24 +156,27 @@ class Generator:
         sample: bool,
         logger: logging.Logger,
     ) -> List[str]:
-        """Generate for one random position at a timestep
-
+        """
         args:
             - burnin: during burn-in period, sample from full distribution; afterwards take argmax
         """
         MASK_ID = tokenizer.convert_tokens_to_ids(["[MASK]"])[0]
-        original_input_ids, seed_length = SeedTextProcessor.seed_text_to_token_ids(
+        input_ids, seed_length = SeedTextProcessor.seed_text_to_token_ids(
             seed_text, tokenizer, max_length, batch_size
         )
-        input_ids = copy.deepcopy(original_input_ids)
+        writable_positions = [
+            ix for ix in range(len(input_ids[0])) if input_ids[0][ix] == MASK_ID
+        ]
 
         for ii in range(max_iter):
-            while True:
-                target_position = np.random.randint(1, max_length - 1)
-                if original_input_ids[0][target_position] == MASK_ID:
-                    break
-                else:
-                    continue
+            if sequential == "always" or (
+                sequential == "first" and ii < len(writable_positions)
+            ):
+                target_position = writable_positions[ii % len(writable_positions)]
+            else:
+                target_position = writable_positions[
+                    np.random.randint(0, len(writable_positions))
+                ]
             for jj in range(batch_size):
                 input_ids[jj][target_position] = MASK_ID
             inp = (
