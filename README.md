@@ -41,6 +41,24 @@ cd ~/kart/src
 bash get_google_bert_model.sh
 ```
 
+#### 1-5. Convert MIMIC-III to BERT pre-training data 
+```
+cd ~/kart/src
+bash make_pretraining_data.sh
+```
+
+#### 1-6. Pre-train BERT model from scratch
+```
+cd ~/kart/src
+bash pretrain_bert_from_scratch.sh
+```
+
+#### 1-7. Pre-train BERT model from BERT-base-uncased
+```
+cd ~/kart/src
+bash pretrain_bert_from_bert_base_uncased.sh
+```
+
 ## Citation
 Please cite our arXiv paper:
 

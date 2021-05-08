@@ -4,3 +4,6 @@
 [submodule "biomedical_ner"]
 	path = biomedical_ner
 	url = git@github:yutanakamura-tky/biomedical_ner.git
+[submodule "src/modules/pymetamap"]
+	path = src/modules/pymetamap
+	url = git@github:AnthonyMRios/pymetamap.git
