@@ -45,25 +45,45 @@ basename_corpus=pretraining_corpus_${2}_${3}.txt
 input_file=${dir_corpus}/${basename_corpus}
 vocab_file=${dir_bert_model}/vocab.txt
 
-basename_tfrecord_128=tf_examples_${2}_${3}_128.tfrecord
-basename_tfrecord_512=tf_examples_${2}_${3}_512.tfrecord
+stem_tfrecord_128=tf_examples_${2}_${3}_128
+stem_tfrecord_512=tf_examples_${2}_${3}_512
+basename_tfrecord_128=${stem_tfrecord_128}.tfrecord
+basename_tfrecord_512=${stem_tfrecord_512}.tfrecord
+basename_tfrecord_128_wwm=${stem_tfrecord_128}_wwm.tfrecord
+basename_tfrecord_512_wwm=${stem_tfrecord_512}_wwm.tfrecord
+
 output_file_128=${dir_corpus}/${basename_tfrecord_128}
 output_file_512=${dir_corpus}/${basename_tfrecord_512}
+output_file_128_wwm=${dir_corpus}/${basename_tfrecord_128_wwm}
+output_file_512_wwm=${dir_corpus}/${basename_tfrecord_512_wwm}
 
 
 
 ### Corpora -> tfrecord
-# Generate datasets for 128 max seq
+# # Generate datasets for 128 max seq
+# python ${script_path} \
+#   --input_file=${input_file} \
+#   --output_file=${output_file_128} \
+#   --vocab_file=${vocab_file} \
+#   --do_lower_case=True \
+#   --max_seq_length=128 \
+#   --max_predictions_per_seq=20 \
+#   --masked_lm_prob=0.15 \
+#   --random_seed=12345 \
+#   --dupe_factor=3
+
+# Generate datasets for 128 max seq with WWM
 python ${script_path} \
   --input_file=${input_file} \
-  --output_file=${output_file_128} \
+  --output_file=${output_file_128_wwm} \
   --vocab_file=${vocab_file} \
   --do_lower_case=True \
   --max_seq_length=128 \
   --max_predictions_per_seq=20 \
   --masked_lm_prob=0.15 \
   --random_seed=12345 \
-  --dupe_factor=3
+  --dupe_factor=3 \
+  --do_whole_word_mask=True
 
 # # Generate datasets for 512 max seq
 # python ${script_path} \
@@ -76,4 +96,16 @@ python ${script_path} \
 #   --masked_lm_prob=0.15 \
 #   --random_seed=12345 \
 #   --dupe_factor=3
-# 
+ 
+# # Generate datasets for 512 max seq WWM
+# python ${script_path} \
+#   --input_file=${input_file} \
+#   --output_file=${output_file_512_wwm} \
+#   --vocab_file=${vocab_file} \
+#   --do_lower_case=True \
+#   --max_seq_length=512 \
+#   --max_predictions_per_seq=76 \
+#   --masked_lm_prob=0.15 \
+#   --random_seed=12345 \
+#   --dupe_factor=3 \
+#   --do_whole_word_mask=True
