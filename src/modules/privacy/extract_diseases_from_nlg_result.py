@@ -1,5 +1,6 @@
 # isort: skip_file
 # (To prevent conflict of isort and black)
+import argparse
 import logging
 import pandas as pd
 import pathlib
@@ -23,28 +24,15 @@ logger.addHandler(file_handler)
 
 
 def main():
-    RESULT_DIR = get_repo_dir() / "src/modules/privacy"
+    args = get_args()
+    input_path = pathlib.Path(args.input_path)
+    output_path = input_path.parent / ("pred_info_" + input_path.stem + ".tsv")
 
-    PATH_F_KA = (
-        RESULT_DIR / "generation_result_model_c0p2_"
-        + "iter_1000_batchsize_16_sequential_always_temp_1.0_topk_100_burnin_1000_len_128_"
-        + "fullname_known_corpus_unused_no_anonymization.txt_finetuned.txt"
-    )
-
-    PATH_F_KAR = (
-        RESULT_DIR / "generation_result_model_c0p2_"
-        + "iter_1000_batchsize_16_sequential_always_temp_1.0_topk_100_burnin_1000_len_128_"
-        + "fullname_unknown_corpus_used_no_anonymization.txt_finetuned.txt"
-    )
-
-    with open(PATH_F_KA) as f:
-        samples_f_ka = f.readlines()[:5000]
-
-    with open(PATH_F_KAR) as f:
-        samples_f_kar = f.readlines()[:5000]
+    with open(input_path) as f:
+        samples = f.readlines()
 
     df_gold = pd.read_csv(
-        "/home/nakamura/kart/corpus/gold_disease_names_hospital_c0p2.tsv", sep="\t"
+        get_repo_dir() / "corpus/gold_disease_names_hospital_c0p2.tsv", sep="\t"
     )
 
     gold_info = [
@@ -54,22 +42,18 @@ def main():
         ].to_dict(orient="split")["data"]
     ]
 
-    columns = ["patient_full_name", "cui", "preferred_name"]
-    df_gold_info = pd.DataFrame(gold_info, columns=columns)
-    df_gold_info.to_csv(RESULT_DIR / "gold_info_hospital_c0p2.tsv", sep="\t")
-
-    pred_info_f_kar = nlg_samples_to_pred_info(samples_f_kar)
-    pred_info_f_ka = nlg_samples_to_pred_info(samples_f_ka)
-
-    df_pred_info_f_kar = pd.DataFrame(pred_info_f_kar, columns=columns)
-    df_pred_info_f_kar.to_csv(
-        RESULT_DIR / "pred_info_hospital_c0p2_finetuned_k_a_r.tsv", sep="\t"
+    gold_columns = ["patient_full_name", "cui", "preferred_name"]
+    pred_columns = ["patient_full_name", "cui", "preferred_name", "sample_index"]
+    df_gold_info = pd.DataFrame(gold_info, columns=gold_columns)
+    df_gold_info.to_csv(
+        get_repo_dir() / "src/modules/privacy/gold_info_hospital_c0p2.tsv",
+        sep="\t",
+        index=False,
     )
 
-    df_pred_info_f_ka = pd.DataFrame(pred_info_f_ka, columns=columns)
-    df_pred_info_f_ka.to_csv(
-        RESULT_DIR / "pred_info_hospital_c0p2_finetuned_k_a.tsv", sep="\t"
-    )
+    pred_info = nlg_samples_to_pred_info(samples)
+    df_pred_info = pd.DataFrame(pred_info, columns=pred_columns)
+    df_pred_info.to_csv(output_path, sep="\t", index=False)
 
 
 def select_samples_with_valid_full_names(
@@ -107,13 +91,13 @@ def extract_pred_names_and_diseases(samples, names, index):
     target_semantic_types = ["dsyn", "mobd", "neop"]
     option = {"restrict_to_sts": target_semantic_types}
 
+    filtered_samples = [samples[i] for i in index]
+    concepts: List[List[Dict]] = extract_umls_concepts(filtered_samples, mm, option)
+
     raw_pred_info = []
 
-    for name, ix in tqdm(zip(names, index)):
-        pred_diseases: List[List[Dict]] = extract_umls_concepts(
-            [samples[ix]], mm, option
-        )[0]
-        for disease in pred_diseases:
+    for concepts_for_one_sample, name, ix in tqdm(zip(concepts, names, index)):
+        for disease in concepts_for_one_sample:
             raw_pred_info.append(
                 {"pred_name": name, "pred_disease": disease, "sample_index": ix}
             )
@@ -130,11 +114,19 @@ def nlg_samples_to_pred_info(samples):
             info["pred_name"],
             info["pred_disease"]["concept"].cui,
             info["pred_disease"]["concept"].preferred_name,
+            info["sample_index"],
         )
         for info in raw_pred_info
     ]
 
     return pred_info
+
+
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input_path", type=str)
+    args = parser.parse_args()
+    return args
 
 
 if __name__ == "__main__":

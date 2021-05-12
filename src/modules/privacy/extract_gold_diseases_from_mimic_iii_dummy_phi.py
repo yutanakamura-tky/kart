@@ -89,7 +89,7 @@ def main():
                         ("semtypes", concept.semtypes),
                         ("score", concept.score),
                         ("cui", concept.cui),
-                        ("perferred_name", concept.preferred_name),
+                        ("preferred_name", concept.preferred_name),
                         ("full_name_mention", full_name_mentions[i]),
                     ]
                     disease = OrderedDict(dict_values)
