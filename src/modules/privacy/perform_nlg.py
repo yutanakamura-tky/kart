@@ -132,9 +132,9 @@ def get_save_path(args: argparse.Namespace) -> pathlib.PosixPath:
         out_basename += "_corpus_unused"
 
     if args.hipaa:
-        out_basename += "_hipaa.txt"
+        out_basename += "_hipaa"
     else:
-        out_basename += "_no_anonymization.txt"
+        out_basename += "_no_anonymization"
 
     if args.scratch:
         out_basename += "_scratch.txt"
