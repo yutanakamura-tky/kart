@@ -26,6 +26,7 @@ logger.addHandler(file_handler)
 
 
 def main():
+    logger.info("=" * 40)
     mm = get_metamap_instance()
     for mode in ("hospital", "shadow"):
         for code in ("c1p2", "c1p1", "c1p0", "c0p2", "c0p1", "c0p0"):
@@ -89,7 +90,7 @@ def main():
                         ("semtypes", concept.semtypes),
                         ("score", concept.score),
                         ("cui", concept.cui),
-                        ("perferred_name", concept.preferred_name),
+                        ("preferred_name", concept.preferred_name),
                         ("full_name_mention", full_name_mentions[i]),
                     ]
                     disease = OrderedDict(dict_values)
