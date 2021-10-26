@@ -43,7 +43,13 @@ def main():
     ]
 
     gold_columns = ["patient_full_name", "cui", "preferred_name"]
-    pred_columns = ["patient_full_name", "cui", "preferred_name", "sample_index"]
+    pred_columns = [
+        "patient_full_name",
+        "cui",
+        "preferred_name",
+        "sample_index",
+        "is_valid_full_name",
+    ]
     df_gold_info = pd.DataFrame(gold_info, columns=gold_columns)
     df_gold_info.to_csv(
         get_repo_dir() / "src/modules/privacy/gold_info_hospital_c0p2.tsv",
@@ -51,20 +57,24 @@ def main():
         index=False,
     )
 
-    pred_info = nlg_samples_to_pred_info(samples)
+    pred_info = nlg_samples_to_pred_info(
+        samples, skip_invalid_full_names=args.skip_invalid_full_names
+    )
     df_pred_info = pd.DataFrame(pred_info, columns=pred_columns)
     df_pred_info.to_csv(output_path, sep="\t", index=False)
 
 
 def select_samples_with_valid_full_names(
-    samples: List[str],
-) -> Tuple[List[str], List[int]]:
+    samples: List[str], skip_invalid_full_names: bool = True
+) -> Tuple[List[str], List[int], List[bool]]:
     namebook = PopularNameBook()
 
     pred_full_names = []
-    using_index = []
+    sample_indices = []
+    full_name_validities = []
 
     for i, sample in tqdm(enumerate(samples)):
+        full_name_is_valid = False
         match_obj = re.match(r"^\[CLS\] (.+?) is a.+$", sample)
 
         if not match_obj:
@@ -73,20 +83,30 @@ def select_samples_with_valid_full_names(
         pred_full_name = match_obj.group(1)
         pred_full_name_parts = pred_full_name.split()
 
-        if len(pred_full_name_parts) != 2:
-            continue
+        if len(pred_full_name_parts) == 2:
+            first_name, last_name = pred_full_name_parts
 
-        first_name, last_name = pred_full_name_parts
+            if (first_name.title() in namebook.first_names_in_vocab) and (
+                last_name.title() in namebook.last_names_in_vocab
+            ):
+                full_name_is_valid = True
 
-        if first_name.title() in namebook.first_names_in_vocab:
-            if last_name.title() in namebook.last_names_in_vocab:
-                using_index.append(i)
-                pred_full_names.append(f"{first_name.title()} {last_name.title()}")
+        if full_name_is_valid or (not skip_invalid_full_names):
+            pred_full_names.append(
+                " ".join([part.title() for part in pred_full_name_parts])
+            )
+            sample_indices.append(i)
+            full_name_validities.append(full_name_is_valid)
 
-    return pred_full_names, using_index
+    return pred_full_names, sample_indices, full_name_validities
 
 
-def extract_pred_names_and_diseases(samples, names, index):
+def extract_pred_names_and_diseases(
+    samples: List[str],
+    names: List[str],
+    index: List[int],
+    full_name_validities: List[bool],
+):
     mm = get_metamap_instance()
     target_semantic_types = ["dsyn", "mobd", "neop"]
     option = {"restrict_to_sts": target_semantic_types}
@@ -96,18 +116,31 @@ def extract_pred_names_and_diseases(samples, names, index):
 
     raw_pred_info = []
 
-    for concepts_for_one_sample, name, ix in tqdm(zip(concepts, names, index)):
+    for concepts_for_one_sample, name, ix, validity in tqdm(
+        zip(concepts, names, index, full_name_validities)
+    ):
         for disease in concepts_for_one_sample:
             raw_pred_info.append(
-                {"pred_name": name, "pred_disease": disease, "sample_index": ix}
+                {
+                    "pred_name": name,
+                    "pred_disease": disease,
+                    "sample_index": ix,
+                    "is_valid_full_name": validity,
+                }
             )
 
     return raw_pred_info
 
 
-def nlg_samples_to_pred_info(samples):
-    names, index = select_samples_with_valid_full_names(samples)
-    raw_pred_info = extract_pred_names_and_diseases(samples, names, index)
+def nlg_samples_to_pred_info(
+    samples: List[str], skip_invalid_full_names: bool = True
+) -> List[Tuple]:
+    names, index, full_name_validities = select_samples_with_valid_full_names(
+        samples, skip_invalid_full_names=skip_invalid_full_names
+    )
+    raw_pred_info = extract_pred_names_and_diseases(
+        samples, names, index, full_name_validities
+    )
 
     pred_info = [
         (
@@ -115,6 +148,7 @@ def nlg_samples_to_pred_info(samples):
             info["pred_disease"]["concept"].cui,
             info["pred_disease"]["concept"].preferred_name,
             info["sample_index"],
+            info["is_valid_full_name"],
         )
         for info in raw_pred_info
     ]
@@ -125,6 +159,7 @@ def nlg_samples_to_pred_info(samples):
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("input_path", type=str)
+    parser.add_argument("--skip-invalid-full-names", action="store_true")
     args = parser.parse_args()
     return args
 

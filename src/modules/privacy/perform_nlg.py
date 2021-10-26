@@ -1,3 +1,11 @@
+# Usage
+#
+# This script requires a TSV file containing the following four types of inormation:
+# - document id
+# - subject id
+# - patient full name
+# - full name mention
+
 import argparse
 import logging
 import pathlib
@@ -60,7 +68,7 @@ def main():
 
     if args.use_full_name_knowledge or args.use_corpus:
         patient_info_path = (
-            get_repo_dir() / f"corpus/gold_full_names_hospital_{args.model_code}.tsv"
+            get_repo_dir() / f"corpus/full_name_mentions_hospital_{args.model_code}.tsv"
         )
 
         df_patient_info = pd.read_csv(patient_info_path, sep="\t")
@@ -115,6 +123,7 @@ def get_save_path(args: argparse.Namespace) -> pathlib.PosixPath:
     out_basename = (
         "generation_result_"
         + f"model{'_'+args.model_code if args.model_code else ''}_"
+        + f"n_{args.n_samples}_"
         + f"iter_{args.max_iter}_"
         + f"batchsize_{args.batch_size}_"
         + f"sequential_{args.sequential}_"
@@ -137,9 +146,14 @@ def get_save_path(args: argparse.Namespace) -> pathlib.PosixPath:
         out_basename += "_no_anonymization"
 
     if args.scratch:
-        out_basename += "_scratch.txt"
+        out_basename += "_scratch"
     else:
-        out_basename += "_finetuned.txt"
+        out_basename += "_finetuned"
+
+    if args.file_suffix:
+        out_basename += f"_{args.file_suffix}.txt"
+    else:
+        out_basename += ".txt"
 
     out_path = out_dir / out_basename
     return out_path
@@ -262,6 +276,7 @@ def get_args() -> argparse.Namespace:
         "-p", "--print-every-iter", dest="print_every_iter", type=int, default=50
     )
     parser.add_argument("-q", "--quiet", dest="quiet", action="store_true")
+    parser.add_argument("--file-suffix", dest="file_suffix", default="")
     args = parser.parse_args()
     return args
 
