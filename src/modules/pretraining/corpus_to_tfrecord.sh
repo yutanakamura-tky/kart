@@ -7,7 +7,7 @@
 # This script converts pretraining corpus txt file into tfrecord file.
 #
 # Run this script as below:
-# 1. To convert D_private or D_public (Hospital corpus)
+# 1. To convert D_private or D_public (Hospital corpus) to tfrecord file:
 #     1-1. Large subset (c1p2)
 #         bash corpus_to_tfrecord.sh hospital c1p2 hipaa
 #         bash corpus_to_tfrecord.sh hospital c1p2 no_anonymization
@@ -27,7 +27,7 @@
 #         bash corpus_to_tfrecord.sh hospital c0p0 hipaa
 #         bash corpus_to_tfrecord.sh hospital c0p0 no_anonymization
 #
-# 2. To convert D_shadow (Shadow corpus)
+# 2. To convert D_shadow (Shadow corpus) to tfrecord file:
 #         bash corpus_to_tfrecord.sh shadow
 
 corpus=$1      # Either of hospital, shadow
@@ -60,17 +60,17 @@ output_file_512_wwm=${dir_corpus}/${basename_tfrecord_512_wwm}
 
 
 ### Corpora -> tfrecord
-# # Generate datasets for 128 max seq
-# python ${script_path} \
-#   --input_file=${input_file} \
-#   --output_file=${output_file_128} \
-#   --vocab_file=${vocab_file} \
-#   --do_lower_case=True \
-#   --max_seq_length=128 \
-#   --max_predictions_per_seq=20 \
-#   --masked_lm_prob=0.15 \
-#   --random_seed=12345 \
-#   --dupe_factor=3
+# Generate datasets for 128 max seq
+python ${script_path} \
+  --input_file=${input_file} \
+  --output_file=${output_file_128} \
+  --vocab_file=${vocab_file} \
+  --do_lower_case=True \
+  --max_seq_length=128 \
+  --max_predictions_per_seq=20 \
+  --masked_lm_prob=0.15 \
+  --random_seed=12345 \
+  --dupe_factor=3
 
 # Generate datasets for 128 max seq with WWM
 python ${script_path} \
@@ -85,27 +85,27 @@ python ${script_path} \
   --dupe_factor=3 \
   --do_whole_word_mask=True
 
-# # Generate datasets for 512 max seq
-# python ${script_path} \
-#   --input_file=${input_file} \
-#   --output_file=${output_file_512} \
-#   --vocab_file=${vocab_file} \
-#   --do_lower_case=True \
-#   --max_seq_length=512 \
-#   --max_predictions_per_seq=76 \
-#   --masked_lm_prob=0.15 \
-#   --random_seed=12345 \
-#   --dupe_factor=3
+# Generate datasets for 512 max seq
+python ${script_path} \
+  --input_file=${input_file} \
+  --output_file=${output_file_512} \
+  --vocab_file=${vocab_file} \
+  --do_lower_case=True \
+  --max_seq_length=512 \
+  --max_predictions_per_seq=76 \
+  --masked_lm_prob=0.15 \
+  --random_seed=12345 \
+  --dupe_factor=3
  
-# # Generate datasets for 512 max seq WWM
-# python ${script_path} \
-#   --input_file=${input_file} \
-#   --output_file=${output_file_512_wwm} \
-#   --vocab_file=${vocab_file} \
-#   --do_lower_case=True \
-#   --max_seq_length=512 \
-#   --max_predictions_per_seq=76 \
-#   --masked_lm_prob=0.15 \
-#   --random_seed=12345 \
-#   --dupe_factor=3 \
-#   --do_whole_word_mask=True
+# Generate datasets for 512 max seq WWM
+python ${script_path} \
+  --input_file=${input_file} \
+  --output_file=${output_file_512_wwm} \
+  --vocab_file=${vocab_file} \
+  --do_lower_case=True \
+  --max_seq_length=512 \
+  --max_predictions_per_seq=76 \
+  --masked_lm_prob=0.15 \
+  --random_seed=12345 \
+  --dupe_factor=3 \
+  --do_whole_word_mask=True
