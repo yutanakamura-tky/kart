@@ -5,7 +5,7 @@ import logging
 import pandas as pd
 import pathlib
 import re
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Union
 from tqdm import tqdm
 from kart.src.modules.privacy.utils.namebook import PopularNameBook
 from kart.src.modules.privacy.utils.umls import (
@@ -106,7 +106,7 @@ def extract_pred_names_and_diseases(
     names: List[str],
     index: List[int],
     full_name_validities: List[bool],
-):
+) -> List[Dict[str, Union[str, int, bool]]]:
     mm = get_metamap_instance()
     target_semantic_types = ["dsyn", "mobd", "neop"]
     option = {"restrict_to_sts": target_semantic_types}
@@ -134,7 +134,7 @@ def extract_pred_names_and_diseases(
 
 def nlg_samples_to_pred_info(
     samples: List[str], skip_invalid_full_names: bool = True
-) -> List[Tuple]:
+) -> List[Tuple[str, str, str, int, bool]]:
     names, index, full_name_validities = select_samples_with_valid_full_names(
         samples, skip_invalid_full_names=skip_invalid_full_names
     )
