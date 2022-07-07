@@ -11,7 +11,7 @@ This is an implementation of our paper "[KART: Parameterization of Privacy Leaka
 
 ![How to make MIMIC-III-dummy-PHI](img/mimic_iii_dummy_phi.png)
 
-We simulate privacy leakage from clinical records using *MIMIC-III-dummy-PHI*
+We simulate privacy leakage from clinical records using **MIMIC-III-dummy-PHI**.
 
 MIMIC-III-dummy-PHI is made by embedding pieced of dummy protected health information (PHI) in [MIMIC-III](https://www.nature.com/articles/sdata201635) corpus.
 
