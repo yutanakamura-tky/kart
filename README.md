@@ -27,7 +27,7 @@ cd ~/kart
 
 # Install dependencies
 python -m venv .venv
-source .venv/source/activate
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
