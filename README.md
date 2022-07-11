@@ -117,10 +117,26 @@ The meaning of `CxPy` is:
 
 ### 2. How to pre-train BERT model
 #### 2-1. Convert MIMIC-III to BERT pre-training data (tfrecords format) 
+
+Run this script for two-step data conversion (CSV -> text lines -> tfrecord)
+
 ```
 cd ~/kart/src
 bash make_pretraining_data.sh
 ```
+
+This script will output the following files:
+- `~/kart/corpus/pretraining_corpus/{half}/pretraining_corpus_{subset}_{a}.txt`
+    - for `{half}` in `hospital`, `shadow`
+    - for `{subset}` in `c0p0`, `c0p1`, `c0p2`, `c1p0`, `c1p1`, `c1p2`
+    - for `{a}` in `hipaa`, `no_anonymization`
+
+
+- `~/kart/corpus/pretraining_corpus/{half}/tf_examples_c0p2_{a}_128.tfrecord`
+- `~/kart/corpus/pretraining_corpus/{half}/tf_examples_c0p2_{a}_128_wwm.tfrecord`
+    - for `{half}` in `hospital`, `shadow`
+    - for `{a}` in `hipaa`, `no_anonymization`
+
 
 #### 2-2. Pre-train BERT model
 To pre-train BERT model from scratch, use this command:
