@@ -84,6 +84,24 @@ cd ~/kart/src
 bash make_mimic_iii_dummy_phi.sh
 ```
 
+This outputs the following files:
+- `~/kart/corpus/MIMIC_III_DUMMY_PHI_HOSPITAL.csv`
+- `~/kart/corpus/MIMIC_III_DUMMY_PHI_HOSPITAL_C0P0.csv`
+- `~/kart/corpus/MIMIC_III_DUMMY_PHI_HOSPITAL_C0P1.csv`
+- `~/kart/corpus/MIMIC_III_DUMMY_PHI_HOSPITAL_C0P2.csv`
+- `~/kart/corpus/MIMIC_III_DUMMY_PHI_HOSPITAL_C1P0.csv`
+- `~/kart/corpus/MIMIC_III_DUMMY_PHI_HOSPITAL_C1P1.csv`
+- `~/kart/corpus/MIMIC_III_DUMMY_PHI_HOSPITAL_C1P2.csv`
+- `~/kart/corpus/MIMIC_III_DUMMY_PHI_SHADOW.csv`
+- `~/kart/corpus/MIMIC_III_DUMMY_PHI_SHADOW_C0P0.csv`
+- `~/kart/corpus/MIMIC_III_DUMMY_PHI_SHADOW_C0P1.csv`
+- `~/kart/corpus/MIMIC_III_DUMMY_PHI_SHADOW_C0P2.csv`
+- `~/kart/corpus/MIMIC_III_DUMMY_PHI_SHADOW_C1P0.csv`
+- `~/kart/corpus/MIMIC_III_DUMMY_PHI_SHADOW_C1P1.csv`
+- `~/kart/corpus/MIMIC_III_DUMMY_PHI_SHADOW_C1P2.csv`
+
+In our paper, we use `~/kart/corpus/MIMIC_III_DUMMY_PHI_HOSPITAL_C0P2.csv` to pre-train BERT models.
+
 ### 2. How to pre-train BERT model
 #### 2-1. Convert MIMIC-III to BERT pre-training data (tfrecords format) 
 ```
