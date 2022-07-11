@@ -9,7 +9,9 @@ This is an implementation of our paper "[KART: Parameterization of Privacy Leaka
 
 ### 1. How to make MIMIC-III-dummy-PHI
 
+<p align="center">
 ![How to make MIMIC-III-dummy-PHI](img/mimic_iii_dummy_phi.png)
+</p>
 
 We simulate privacy leakage from clinical records using **MIMIC-III-dummy-PHI**.
 
@@ -52,17 +54,28 @@ poetry install
 ```
 
 
-#### 1-2. Make MIMIC-III-dummy-PHI
+#### 1-2. Get Necessary files
 
-First, get `NOTEEVENTS.csv.gz` in MIMIC-III version 1.4 [here](https://physionet.org/content/mimiciii/1.4/) and place it in `corpus` directory.
+This repository requires two datasets to create MIMIC-III-dummy-PHI:
+
+- MIMIC-III version 1.4 noteevents (`NOTEEVENTS.csv.gz`) ([here](https://physionet.org/content/mimiciii/1.4/))
+- n2c2 2006 De-identification challenge training dataset "Data Set 1B: De-identification Training Set" (`deid_surrogate_train_all_version2.zip`) ([here](https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp))
+
+Obtain two datasets above and extract them into `~/kart/corpus`:
 
 ```
 mv /path/to/NOTEEVENTS.csv.gz ~/kart/corpus
 cd ~/kart/corpus
 gunzip NOTEEVENTS.csv.gz
+
+mv /path/to/deid_surrogate_train_all_version2.zip ~/kart/corpus
+cd ~/kart/corpus
+unzip deid_surrogate_train_all_version2.zip
 ```
 
-Then run `make_mimic_iii_dummy_phi.sh`. Make sure that you are in the virtual environment:
+#### 1-3. Make MIMIC-III-dummy-PHI
+
+Run `make_mimic_iii_dummy_phi.sh`. Make sure that you are in the virtual environment:
 
 ```
 cd ~/kart/src
