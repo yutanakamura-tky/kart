@@ -61,7 +61,9 @@ This repository requires two datasets to create MIMIC-III-dummy-PHI:
 - MIMIC-III version 1.4 noteevents (`NOTEEVENTS.csv.gz`) ([here](https://physionet.org/content/mimiciii/1.4/))
 - n2c2 2006 De-identification challenge training dataset "Data Set 1B: De-identification Training Set" (`deid_surrogate_train_all_version2.zip`) ([here](https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp))
 
-Obtain two datasets above and extract them into `~/kart/corpus`:
+Note that registration is necessary to download these datasets.
+
+After downloading the datasets, extract them into `~/kart/corpus`:
 
 ```
 mv /path/to/NOTEEVENTS.csv.gz ~/kart/corpus
