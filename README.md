@@ -10,7 +10,7 @@ This is an implementation of our paper "[KART: Parameterization of Privacy Leaka
 ### 1. How to make MIMIC-III-dummy-PHI
 
 <p align="center">
-![How to make MIMIC-III-dummy-PHI](img/mimic_iii_dummy_phi.png)
+<img src="img/mimic_iii_dummy_phi.png">
 </p>
 
 We simulate privacy leakage from clinical records using **MIMIC-III-dummy-PHI**.
