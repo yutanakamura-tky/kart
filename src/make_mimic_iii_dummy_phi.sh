@@ -8,7 +8,7 @@
 #
 # 1. Prepare the following files:
 #    - MIMIC-III noteevents at "../corpus/NOTEEVENTS.csv"
-#    - i2b2 2006 de-identification training set at "../corpus/deid_surrogate_train.xml"
+#    - i2b2 2006 de-identification training set at "../corpus/deid_surrogate_train_all_version2.xml"
 #
 # 2. Change working directory to "src".
 #

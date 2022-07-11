@@ -11,7 +11,7 @@ common_data_dir=$2
 tmp=${common_data_dir}/___temp_noteevents_text_cleaned.csv
 
 input_mimic_file=${dataset_dir}/NOTEEVENTS.csv  # This data will be used repeatedly
-input_i2b2_file=${dataset_dir}/deid_surrogate_train.xml  # This data will be used repeatedly
+input_i2b2_file=${dataset_dir}/deid_surrogate_train_all_version2.xml  # This data will be used repeatedly
 output_raw_noteevents=${common_data_dir}/noteevents_text_original.csv  # This data will be used repeatedly
 output_cleaned_noteevents=${common_data_dir}/noteevents_text_cleaned.csv  # This data will be used repeatedly
 
